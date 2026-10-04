@@ -187,32 +187,36 @@ body {
 
 .splash-card {
   text-align: center;
-  padding: 30px 40px;
-  background: rgba(18, 24, 38, 0.95);
-  border: 3px solid #ffcc00;
-  border-radius: 10px;
-  box-shadow: 0 0 30px rgba(255, 204, 0, 0.3);
+  padding: 30px 45px;
+  background: rgba(6, 40, 20, 0.96);
+  border: 4px double #ffcc00;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 204, 0, 0.3);
 }
 
 .glow-title {
-  font-size: 52px;
+  font-size: 56px;
   font-weight: 900;
   color: #ffcc00;
   letter-spacing: 6px;
-  text-shadow: 0 0 16px rgba(255, 204, 0, 0.8);
+  text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
 }
 
 .sub-title {
-  font-size: 15px;
-  color: #00e676;
-  letter-spacing: 3px;
-  margin-top: -6px;
+  font-size: 14px;
+  color: #ffffff;
+  letter-spacing: 4px;
+  font-weight: 700;
+  margin-top: -4px;
   margin-bottom: 16px;
+  text-shadow: 1px 1px 0 #000;
 }
 
 .lotus-badge {
-  font-size: 12px;
-  color: #94a3b8;
+  font-size: 13px;
+  color: #ffcc00;
+  font-weight: bold;
+  letter-spacing: 1px;
   margin-bottom: 24px;
 }
 

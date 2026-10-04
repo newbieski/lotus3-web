@@ -330,61 +330,92 @@ export class Renderer {
   }
 
   renderHUD(ctx, player, road, width, height) {
-    // Lotus 3 Authentic Arcade HUD Bar at top
-    ctx.fillStyle = 'rgba(10, 16, 26, 0.92)';
-    ctx.fillRect(0, 0, width, 48);
-    ctx.fillStyle = '#ffcc00';
-    ctx.fillRect(0, 47, width, 2);
+    // -------------------------------------------------------------
+    // AUTHENTIC LOTUS 3 IN-GAME HUD (Matches Original DOS Layout)
+    // -------------------------------------------------------------
+    ctx.lineJoin = 'miter';
+    ctx.miterLimit = 2;
 
-    ctx.font = 'bold 15px "Courier New", monospace';
+    const kmh = Math.round(player.getSpeedMph() * 1.60934);
+    const speedStr = kmh.toString().padStart(3, '0');
 
-    // 1. SPEED (MPH)
-    const speed = player.getSpeedMph();
+    // 1. TOP-LEFT: Speed in KMH (White font with thick black outline)
+    ctx.font = '900 22px "Impact", "Arial Black", monospace';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 4;
+    ctx.strokeText(`${speedStr} · KMH ·`, 18, 28);
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('SPEED', 15, 18);
-    ctx.fillStyle = '#ffdd33';
-    ctx.font = 'bold 19px "Courier New", monospace';
-    ctx.fillText(`${speed.toString().padStart(3, ' ')} MPH`, 15, 38);
+    ctx.fillText(`${speedStr} · KMH ·`, 18, 28);
 
-    // 2. RPM Bar
-    ctx.font = 'bold 12px "Courier New", monospace';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('RPM', 115, 18);
+    // RPM / Turbo Red Gauge Box directly under speed
+    const rpmBoxX = 18;
+    const rpmBoxY = 36;
+    const rpmBoxW = 110;
+    const rpmBoxH = 22;
+    // Outer black border
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(rpmBoxX, rpmBoxY, rpmBoxW, rpmBoxH);
+    ctx.fillStyle = '#1c4a8c'; // Dark blue unlit background
+    ctx.fillRect(rpmBoxX, rpmBoxY, rpmBoxW, rpmBoxH);
+    // Filled Red bar
     const rpmRatio = (player.getRPM() - 1200) / 6800;
-    const barW = 85;
-    ctx.fillStyle = '#222222';
-    ctx.fillRect(115, 24, barW, 12);
-    ctx.fillStyle = rpmRatio > 0.85 ? '#ff2222' : (rpmRatio > 0.6 ? '#ffaa00' : '#00dd44');
-    ctx.fillRect(115, 24, barW * Math.min(1.0, Math.max(0, rpmRatio)), 12);
-    ctx.strokeStyle = '#666666';
-    ctx.strokeRect(115, 24, barW, 12);
+    const fillW = Math.min(rpmBoxW, Math.max(0, rpmBoxW * rpmRatio));
+    ctx.fillStyle = '#cc1111'; // Iconic Lotus red bar
+    ctx.fillRect(rpmBoxX, rpmBoxY, fillW, rpmBoxH);
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(rpmBoxX, rpmBoxY, rpmBoxW, rpmBoxH);
 
-    // 3. TIME REMAINING
+    // Rank / Position (1ST, 2ND, etc.)
+    ctx.font = '900 32px "Impact", "Arial Black", monospace';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 6;
+    ctx.strokeText('1ST', 18, 92);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('1ST', 18, 92);
+
+    // 2. TOP-RIGHT: Score & Checkpoint Timer
+    // Score Counter (8 digits)
+    const score = Math.floor(player.z * 1.2);
+    const scoreStr = score.toString().padStart(8, '0');
+    ctx.font = '900 20px "Impact", "Arial Black", monospace';
+    ctx.textAlign = 'right';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 4;
+    ctx.strokeText(scoreStr, width - 18, 28);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(scoreStr, width - 18, 28);
+
+    // Remaining Countdown Time (Giant blocky digits)
     const timeSec = Math.ceil(player.timeRemaining);
-    ctx.font = 'bold 14px "Courier New", monospace';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('TIME', 230, 18);
-    ctx.font = 'bold 22px "Courier New", monospace';
-    ctx.fillStyle = timeSec <= 10 ? (Math.floor(performance.now() / 250) % 2 === 0 ? '#ff1111' : '#ffffff') : '#00ff66';
-    ctx.fillText(`${timeSec.toString().padStart(2, '0')}`, 230, 40);
+    const timeStr = timeSec.toString().padStart(2, '0');
+    ctx.font = '900 36px "Impact", "Arial Black", monospace';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 6;
+    ctx.strokeText(timeStr, width - 20, 74);
+    ctx.fillStyle = (timeSec <= 10 && Math.floor(performance.now() / 250) % 2 === 0) ? '#ff2222' : '#ffffff';
+    ctx.fillText(timeStr, width - 20, 74);
 
-    // 4. STAGE TITLE (ROADWORKS, FOREST, SNOW)
-    ctx.font = 'bold 13px "Courier New", monospace';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('COURSE', 320, 18);
-    ctx.fillStyle = '#33ccff';
-    ctx.font = 'bold 14px "Courier New", monospace';
-    const stageName = road.currentCourseName || 'ROADWORKS';
-    ctx.fillText(stageName, 320, 38);
+    // Vertical Segmented Ladder Gauge (Lotus 3 icon on top right)
+    const ladderX = width - 42;
+    const ladderY = 82;
+    const ladderW = 24;
+    const ladderH = 38;
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(ladderX, ladderY, ladderW, ladderH);
+    ctx.fillStyle = '#0a1018';
+    ctx.fillRect(ladderX, ladderY, ladderW, ladderH);
+    // Draw horizontal notches
+    for (let r = 0; r < 7; r++) {
+      const ny = ladderY + 3 + r * 5;
+      const isLit = (6 - r) <= Math.floor(rpmRatio * 6);
+      ctx.fillStyle = isLit ? (r < 2 ? '#ff2222' : '#00dd44') : '#222e3c';
+      ctx.fillRect(ladderX + 2, ny, ladderW - 4, 3);
+    }
 
-    // 5. CAR MODEL (M200, ESPRIT, ELAN)
-    ctx.font = 'bold 13px "Courier New", monospace';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('VEHICLE', 490, 18);
-    const carName = player.carSpecs[player.selectedCar]?.name || 'LOTUS M200';
-    ctx.fillStyle = '#ffaa00';
-    ctx.font = 'bold 14px "Courier New", monospace';
-    ctx.fillText(carName, 490, 38);
+    ctx.textAlign = 'start'; // reset align
 
     // Game Over Overlay
     if (player.isGameOver) {
