@@ -50,12 +50,12 @@
       <div id="crtOverlay" class="crt-scanlines"></div>
 
       <!-- Splash / Click-to-Play Overlay -->
-      <div id="splashScreen" class="overlay-screen">
+      <div id="splashScreen" class="overlay-screen" onclick="if(window.startGameNow) window.startGameNow();">
         <div class="splash-card">
           <h1 class="glow-title">LOTUS III</h1>
           <h2 class="sub-title">THE ULTIMATE CHALLENGE • WEB RECREATION</h2>
           <div class="lotus-badge">🚧 FIRST DEMO: ROADWORKS (공사장) & LOTUS M200 SPEEDSTER 🚧</div>
-          <div class="pulse-start">▶ CLICK OR PRESS SPACE TO START ◀</div>
+          <div class="pulse-start" id="pulseStartBtn" onclick="if(window.startGameNow) window.startGameNow();">▶ CLICK OR PRESS SPACE TO START ◀</div>
           <div class="key-guide">
             <span>[⬆ / W] 가속</span>
             <span>[⬇ / S / Space] 감속</span>
@@ -100,6 +100,17 @@
         scanlineBtn.textContent = crtEnabled ? '📺 CRT: ON' : '📺 CRT: OFF';
       });
     }
+
+    // Global key listener for immediate Space / Enter start
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.key === ' ' || e.code === 'Enter') {
+        if (window.startGameNow) {
+          window.startGameNow();
+        } else {
+          window.pendingStart = true;
+        }
+      }
+    });
   </script>
 </body>
 </html>

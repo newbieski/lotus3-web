@@ -32,47 +32,57 @@ class LotusGame {
     this.gameState = 'SPLASH'; // SPLASH, PLAYING, GAMEOVER, FINISHED
     this.loop = new GameLoop(this.update.bind(this), this.render.bind(this));
 
+    this.initListeners();
+    this.loop.start();
     this.init();
   }
 
-    // Build Default Course: ROADWORKS (공사장)
-    this.loadTrack(this.currentCourseKey);
-
-    // Setup Start Overlay listener immediately
-    const splashEl = document.getElementById('splashScreen');
-    const startAction = () => {
-      if (this.gameState === 'SPLASH') {
-        try {
-          this.audio.init();
-          this.audio.resume();
-          this.audio.playBGM('lotus3_radio_mix');
-        } catch (e) {
-          console.warn('Audio init error (non-fatal):', e);
-        }
-        this.gameState = 'PLAYING';
-        if (splashEl) splashEl.style.display = 'none';
-        this.renderer.showBanner(`STAGE: ${this.road.currentCourseName} - GO!`, 2.5, '#00ff66');
+  startRace() {
+    console.log('[Lotus3] startRace called! gameState:', this.gameState);
+    if (this.gameState === 'SPLASH') {
+      try {
+        this.audio.init();
+        this.audio.resume();
+        this.audio.playBGM('lotus3_radio_mix');
+      } catch (e) {
+        console.warn('Audio start error:', e);
       }
-    };
-
-    if (splashEl) {
-      splashEl.addEventListener('click', startAction);
+      this.gameState = 'PLAYING';
+      const splashEl = document.getElementById('splashScreen');
+      if (splashEl) splashEl.style.display = 'none';
+      this.renderer.showBanner(`STAGE: ${this.road.currentCourseName} - GO!`, 2.5, '#00ff66');
     }
-    this.canvas.addEventListener('click', startAction);
+  }
+
+  initListeners() {
+    window.startGameNow = () => this.startRace();
+
+    const splashEl = document.getElementById('splashScreen');
+    if (splashEl) {
+      splashEl.addEventListener('click', () => this.startRace());
+    }
+    this.canvas.addEventListener('click', () => this.startRace());
 
     window.addEventListener('keydown', (e) => {
-      if (this.gameState === 'SPLASH' && (e.code === 'Space' || e.key === ' ' || e.code === 'Enter' || e.code === 'ArrowUp' || e.key === 'w')) {
+      if (this.gameState === 'SPLASH' && (e.code === 'Space' || e.key === ' ' || e.code === 'Enter' || e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W')) {
         e.preventDefault();
-        startAction();
+        this.startRace();
       }
     });
+  }
 
-    // Start game loop right away so splash / canvas is responsive
-    this.loop.start();
+  async init() {
+    // Build Default Course: ROADWORKS (공사장)
+    this.loadTrack(this.currentCourseKey);
 
     console.log('Loading Lotus 3 assets...');
     await this.sprites.loadAll();
     console.log('Lotus 3 assets loaded successfully.');
+
+    if (window.pendingStart) {
+      window.pendingStart = false;
+      this.startRace();
+    }
 
     // Mute button
     const muteBtn = document.getElementById('muteBtn');
@@ -335,7 +345,16 @@ class LotusGame {
   }
 }
 
-// Boot game on window load
-window.addEventListener('DOMContentLoaded', () => {
-  window.lotusGame = new LotusGame();
-});
+// Robust bootloader: supports already loaded DOM state in ES modules
+function bootLotusGame() {
+  if (!window.lotusGame) {
+    console.log('[Lotus3] Instantiating LotusGame...');
+    window.lotusGame = new LotusGame();
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootLotusGame);
+} else {
+  bootLotusGame();
+}
