@@ -14,7 +14,7 @@
 | **Phase 2** | Pseudo-3D 도로 렌더링 코어 | **완료 (DONE)** | 스캔라인 래스터 로드 엔진, 언덕/커브 투영, 3중 패럴랙스 배경, Web Audio 엔진음/BGM |
 | **Phase 3** | Lotus 3 맵 정밀화 & 장애물 판정 | **완료 (DONE)** | 점프대 도약/착지 물리, 오일 슬릭 스핀아웃, 꼬깔콘 파티클, 복공판, 트윈캠 수동/자동 변속(Low/High) |
 | **Phase 4** | 라이벌 AI 레이스 & 트래픽 | **진행 대기 (READY)** | 19대 라이벌 차량 추월, 추돌 스파크/물리, 슬립스트림 부스트 |
-| **Phase 5** | 8개 코스 및 날씨/RECS | 예정 (TODO) | Night, Fog, Storm, Desert 등 전 코스 및 RECS 코스 생성기 |
+| **Phase 5** | Lotus 3 전 6개 코스 테마 & 날씨 | **완료 (DONE)** | Roadworks, Forest, Snow, Desert, Night, Storm 6개 코스 완비, 배경 테마 격리(크레인 버그 완치), 비/번개/눈 날씨 |
 | **Phase 6** | UI 완성 & 최종 폴리싱 | 예정 (TODO) | 차량 선택 화면, 체크포인트 팡파르, 최종 모바일/사운드 최적화 |
 
 ---

@@ -12,6 +12,7 @@ export class RoadManager {
     this.segments = [];
     this.checkpoints = [];
     this.trackLength = 0;
+    this.theme = null;
   }
 
   addSegment(curve, y) {

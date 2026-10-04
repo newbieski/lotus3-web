@@ -397,8 +397,61 @@ def generate_snow_assets():
     im.save(os.path.join(SPRITES_DIR, "tree_snow.png"))
     print("Snow scenery sprites generated!")
 
+def generate_scenery_assets():
+    # 1. Giant Saguaro Desert Cactus
+    w_cac, h_cac = 140, 250
+    im_cac = Image.new("RGBA", (w_cac, h_cac), (0, 0, 0, 0))
+    d_cac = ImageDraw.Draw(im_cac)
+    cx = w_cac // 2
+    # Base shadow
+    d_cac.ellipse([cx - 30, h_cac - 20, cx + 30, h_cac - 5], fill=(0, 0, 0, 110))
+    # Main trunk
+    d_cac.rounded_rectangle([cx - 18, 40, cx + 18, h_cac - 12], radius=16, fill="#256e3b", outline="#134522", width=3)
+    # Trunk ribs/stripes
+    for rx in [-10, 0, 10]:
+        d_cac.line([(cx + rx, 48), (cx + rx, h_cac - 16)], fill="#399e59", width=2)
+    # Left arm
+    d_cac.rounded_rectangle([cx - 52, 95, cx - 14, 125], radius=10, fill="#256e3b", outline="#134522", width=3)
+    d_cac.rounded_rectangle([cx - 52, 60, cx - 30, 125], radius=10, fill="#256e3b", outline="#134522", width=3)
+    # Right arm
+    d_cac.rounded_rectangle([cx + 14, 120, cx + 52, 150], radius=10, fill="#256e3b", outline="#134522", width=3)
+    d_cac.rounded_rectangle([cx + 30, 75, cx + 52, 150], radius=10, fill="#256e3b", outline="#134522", width=3)
+    im_cac.save(os.path.join(SPRITES_DIR, "obstacle_cactus.png"))
+
+    # 2. Red Sandstone Canyon Rock
+    w_drk, h_drk = 180, 110
+    im_drk = Image.new("RGBA", (w_drk, h_drk), (0, 0, 0, 0))
+    d_drk = ImageDraw.Draw(im_drk)
+    # Base shadow
+    d_drk.ellipse([15, 80, 165, 105], fill=(0, 0, 0, 120))
+    # Boulder facet polygons
+    pts_rock = [(20, 85), (35, 45), (75, 20), (135, 28), (160, 60), (150, 90), (30, 92)]
+    d_drk.polygon(pts_rock, fill="#994426", outline="#4a1d0d", width=2)
+    # Highlight facets
+    d_drk.polygon([(35, 45), (75, 20), (105, 55), (60, 75)], fill="#bd5c35")
+    d_drk.polygon([(75, 20), (135, 28), (145, 60), (105, 55)], fill="#d67245")
+    im_drk.save(os.path.join(SPRITES_DIR, "obstacle_desert_rock.png"))
+
+    # 3. Highway Lamppost for Night Stage
+    w_lmp, h_lmp = 110, 280
+    im_lmp = Image.new("RGBA", (w_lmp, h_lmp), (0, 0, 0, 0))
+    d_lmp = ImageDraw.Draw(im_lmp)
+    # Steel post
+    d_lmp.rectangle([18, 50, 26, 275], fill="#707580", outline="#2b2d32")
+    # Curved cantilever arm
+    d_lmp.line([(22, 50), (22, 20), (60, 10), (85, 25)], fill="#707580", width=6)
+    # Lamp housing & luminous bulb
+    d_lmp.rectangle([70, 22, 98, 38], fill="#30333a", outline="#111111")
+    d_lmp.ellipse([72, 32, 96, 46], fill="#fff0aa") # glowing light
+    # Soft yellow light aura
+    d_lmp.ellipse([50, 15, 115, 75], fill=(255, 240, 150, 70))
+    im_lmp.save(os.path.join(SPRITES_DIR, "lamp_post.png"))
+
+    print("Desert & Night scenery sprites generated!")
+
 if __name__ == "__main__":
     generate_m200_sprites()
     generate_roadworks_assets()
     generate_roadworks_background()
     generate_snow_assets()
+    generate_scenery_assets()

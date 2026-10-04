@@ -195,11 +195,12 @@ export class Renderer {
     this.treeOffset = (this.treeOffset + curve * 0.95 * speedRatio) % width;
 
     const theme = road.theme || {};
-    const skyKey = theme.sky || 'bg_sky';
-    const skylineKey = theme.skyline || 'bg_mountains';
+    const skyKey = theme.sky || 'bg_forest_sky';
+    const skylineKey = theme.skyline || 'bg_forest_mountains';
+    const horizonKey = theme.horizon || (skylineKey.includes('forest') ? 'bg_forest_hills' : null);
 
     // 1. Sky
-    const sky = spriteManager.get(skyKey) || spriteManager.get('bg_sky');
+    const sky = spriteManager.get(skyKey) || spriteManager.get('bg_forest_sky') || spriteManager.get('bg_sky');
     if (sky) {
       this.drawParallaxLayer(ctx, sky, this.skyOffset, 0, width, height * 0.58);
     } else {
@@ -207,23 +208,51 @@ export class Renderer {
       ctx.fillRect(0, 0, width, height * 0.58);
     }
 
-    // 2. Mid Skyline (Cranes / Mountains)
-    const mtn = spriteManager.get(skylineKey) || spriteManager.get('bg_mountains');
+    // 2. Mid Skyline (Cranes / Mountains / Mesas / City / Glaciers)
+    const mtn = spriteManager.get(skylineKey);
     if (mtn) {
       this.drawParallaxLayer(ctx, mtn, this.hillOffset, height * 0.18, width, height * 0.38);
     }
 
-    // 3. Near Horizon (Forest hills if not roadworks)
-    if (!theme.skyline || theme.skyline === 'bg_mountains') {
-      const fst = spriteManager.get('bg_forest_hills');
+    // 3. Near Horizon (Forest hills if available)
+    if (horizonKey) {
+      const fst = spriteManager.get(horizonKey);
       if (fst) {
         this.drawParallaxLayer(ctx, fst, this.treeOffset, height * 0.28, width, height * 0.30);
       }
     }
 
-    // 4. Falling Snow Weather Effect
-    if (theme.isSnow) {
+    // 4. Weather Effects (Snow, Rain, Thunder Lightning)
+    if (theme.weather === 'snow' || theme.isSnow) {
       this.renderSnow(ctx, width, height);
+    } else if (theme.weather === 'rain') {
+      this.renderRain(ctx, width, height);
+    } else if (theme.weather === 'lightning') {
+      this.renderRain(ctx, width, height);
+      this.renderLightning(ctx, width, height);
+    }
+  }
+
+  renderRain(ctx, width, height) {
+    ctx.strokeStyle = 'rgba(180, 215, 255, 0.65)';
+    ctx.lineWidth = 1.5;
+    const t = performance.now() * 0.003;
+    ctx.beginPath();
+    for (let i = 0; i < 90; i++) {
+      const rx = (Math.sin(i * 133 + t) * 0.5 + 0.5) * width;
+      const ry = ((i * 37 + t * 900) % height);
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx - 8, ry + 24);
+    }
+    ctx.stroke();
+  }
+
+  renderLightning(ctx, width, height) {
+    const t = performance.now() * 0.001;
+    // Periodic sudden lightning flash
+    if (Math.sin(t * 1.5) > 0.982) {
+      ctx.fillStyle = 'rgba(240, 245, 255, 0.38)';
+      ctx.fillRect(0, 0, width, height);
     }
   }
 

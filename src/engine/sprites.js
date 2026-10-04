@@ -7,10 +7,22 @@ export class SpriteManager {
 
   async loadAll() {
     const spriteList = [
-      // Backgrounds
+      // Course Backgrounds (All 6 Official Lotus 3 Sceneries)
+      { key: 'bg_forest_sky', path: 'assets/sprites/bg_forest_sky.png' },
+      { key: 'bg_forest_mountains', path: 'assets/sprites/bg_forest_mountains.png' },
+      { key: 'bg_forest_hills', path: 'assets/sprites/bg_forest_hills.png' },
       { key: 'bg_sky', path: 'assets/sprites/bg_sky.png' },
       { key: 'bg_mountains', path: 'assets/sprites/bg_mountains.png' },
-      { key: 'bg_forest_hills', path: 'assets/sprites/bg_forest_hills.png' },
+      { key: 'bg_roadworks_sky', path: 'assets/sprites/bg_roadworks_sky.png' },
+      { key: 'bg_roadworks_skyline', path: 'assets/sprites/bg_roadworks_skyline.png' },
+      { key: 'bg_snow_sky', path: 'assets/sprites/bg_snow_sky.png' },
+      { key: 'bg_snow_mountains', path: 'assets/sprites/bg_snow_mountains.png' },
+      { key: 'bg_desert_sky', path: 'assets/sprites/bg_desert_sky.png' },
+      { key: 'bg_desert_mountains', path: 'assets/sprites/bg_desert_mountains.png' },
+      { key: 'bg_night_sky', path: 'assets/sprites/bg_night_sky.png' },
+      { key: 'bg_night_skyline', path: 'assets/sprites/bg_night_skyline.png' },
+      { key: 'bg_storm_sky', path: 'assets/sprites/bg_storm_sky.png' },
+      { key: 'bg_storm_skyline', path: 'assets/sprites/bg_storm_skyline.png' },
 
       // Player Lotus Elan SE
       { key: 'player_straight', path: 'assets/sprites/player_elan_straight.png' },
@@ -54,8 +66,6 @@ export class SpriteManager {
       { key: 'gantry_checkpoint', path: 'assets/sprites/gantry_checkpoint.png' },
 
       // Lotus 3: Roadworks (공사장) Assets
-      { key: 'bg_roadworks_sky', path: 'assets/sprites/bg_roadworks_sky.png' },
-      { key: 'bg_roadworks_skyline', path: 'assets/sprites/bg_roadworks_skyline.png' },
       { key: 'obstacle_cone', path: 'assets/sprites/obstacle_cone.png' },
       { key: 'obstacle_barricade', path: 'assets/sprites/obstacle_barricade.png' },
       { key: 'obstacle_drum', path: 'assets/sprites/obstacle_drum.png' },
@@ -67,6 +77,13 @@ export class SpriteManager {
 
       // Lotus 3: Snow (설원) Assets
       { key: 'tree_snow', path: 'assets/sprites/tree_snow.png' },
+
+      // Lotus 3: Desert (사막) Assets
+      { key: 'obstacle_cactus', path: 'assets/sprites/obstacle_cactus.png' },
+      { key: 'obstacle_desert_rock', path: 'assets/sprites/obstacle_desert_rock.png' },
+
+      // Lotus 3: Night (야간) Assets
+      { key: 'lamp_post', path: 'assets/sprites/lamp_post.png' },
 
       // Lotus 3: Player Car - Lotus M200 Speedster (Silver Concept)
       { key: 'player_m200_straight', path: 'assets/sprites/player_m200_straight.png' },

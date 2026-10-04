@@ -12,6 +12,9 @@ import { RivalManager } from './entities/rivals.js';
 import { buildRoadworksTrack } from './tracks/roadworks.js';
 import { buildForestTrack } from './tracks/forest.js';
 import { buildSnowTrack } from './tracks/snow.js';
+import { buildDesertTrack } from './tracks/desert.js';
+import { buildNightTrack } from './tracks/night.js';
+import { buildStormTrack } from './tracks/storm.js';
 
 class LotusGame {
   constructor() {
@@ -144,12 +147,24 @@ class LotusGame {
     if (courseKey === 'roadworks') {
       this.road.currentCourseName = 'ROADWORKS (공사장)';
       buildRoadworksTrack(this.road);
+    } else if (courseKey === 'forest') {
+      this.road.currentCourseName = 'FOREST (자연풍경 / 숲)';
+      buildForestTrack(this.road);
     } else if (courseKey === 'snow') {
       this.road.currentCourseName = 'SNOW BLIZZARD (설원)';
       buildSnowTrack(this.road);
+    } else if (courseKey === 'desert') {
+      this.road.currentCourseName = 'DESERT CANYON (사막 협곡)';
+      buildDesertTrack(this.road);
+    } else if (courseKey === 'night') {
+      this.road.currentCourseName = 'NIGHT HIGHWAY (야간 고속도로)';
+      buildNightTrack(this.road);
+    } else if (courseKey === 'storm') {
+      this.road.currentCourseName = 'STORM & THUNDER (폭풍우)';
+      buildStormTrack(this.road);
     } else {
-      this.road.currentCourseName = 'FOREST (자연풍경)';
-      buildForestTrack(this.road);
+      this.road.currentCourseName = 'ROADWORKS (공사장)';
+      buildRoadworksTrack(this.road);
     }
 
     this.rivals.init(this.road.segments);
@@ -291,7 +306,8 @@ class LotusGame {
             }
           } else if (spr.key === 'obstacle_barricade' || spr.key === 'obstacle_drum' || 
                      spr.key === 'obstacle_excavator' || spr.key === 'obstacle_log' || 
-                     spr.key === 'obstacle_rock') {
+                     spr.key === 'obstacle_rock' || spr.key === 'obstacle_cactus' || 
+                     spr.key === 'obstacle_desert_rock' || spr.key === 'lamp_post') {
             if (this.player.y < 25) { // If car jumped high enough, fly over!
               this.player.triggerSpin();
               this.renderer.showBanner('💥 CRASH!', 1.2, '#ff3333');
