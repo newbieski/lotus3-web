@@ -1,4 +1,4 @@
-// Main Entry Point for Lotus 2 Web Engine
+// Main Entry Point for Lotus 3 Web Engine
 import { CONFIG } from './config.js';
 import { GameLoop } from './core/loop.js';
 import { InputManager } from './core/input.js';
@@ -9,7 +9,9 @@ import { RoadManager } from './engine/road.js';
 import { Renderer } from './engine/renderer.js';
 import { Player } from './entities/player.js';
 import { RivalManager } from './entities/rivals.js';
+import { buildRoadworksTrack } from './tracks/roadworks.js';
 import { buildForestTrack } from './tracks/forest.js';
+import { buildSnowTrack } from './tracks/snow.js';
 
 class LotusGame {
   constructor() {
@@ -26,6 +28,7 @@ class LotusGame {
     this.rivals = new RivalManager();
     this.renderer = new Renderer(this.canvas);
 
+    this.currentCourseKey = 'roadworks'; // FIRST DEMO STARTS ON ROADWORKS (공사장)!
     this.gameState = 'SPLASH'; // SPLASH, PLAYING, GAMEOVER, FINISHED
     this.loop = new GameLoop(this.update.bind(this), this.render.bind(this));
 
@@ -33,24 +36,23 @@ class LotusGame {
   }
 
   async init() {
-    console.log('Loading Lotus 2 sprites and assets...');
+    console.log('Loading Lotus 3 assets...');
     await this.sprites.loadAll();
-    console.log('Sprites loaded successfully.');
+    console.log('Lotus 3 assets loaded successfully.');
 
-    // Build Forest Stage
-    buildForestTrack(this.road);
-    this.rivals.init(this.road.segments);
+    // Build Default Course: ROADWORKS (공사장)
+    this.loadTrack(this.currentCourseKey);
 
-    // Setup Start Overlay click / keypress listener
+    // Setup Start Overlay listener
     const splashEl = document.getElementById('splashScreen');
     const startAction = () => {
       if (this.gameState === 'SPLASH') {
         this.audio.init();
         this.audio.resume();
-        this.audio.playBGM('forest');
+        this.audio.playBGM('lotus3_radio_mix');
         this.gameState = 'PLAYING';
         if (splashEl) splashEl.style.display = 'none';
-        this.renderer.showBanner('STAGE 1: FOREST - GO!', 2.5, '#00ff66');
+        this.renderer.showBanner(`STAGE: ${this.road.currentCourseName} - GO!`, 2.5, '#00ff66');
       }
     };
 
@@ -72,10 +74,67 @@ class LotusGame {
       });
     }
 
+    // Radio Tuner button
+    const radioBtn = document.getElementById('radioBtn');
+    if (radioBtn) {
+      radioBtn.addEventListener('click', () => {
+        this.tuneNextRadio();
+      });
+    }
+
+    // Course Selector
+    const courseSelect = document.getElementById('courseSelect');
+    if (courseSelect) {
+      courseSelect.addEventListener('change', (e) => {
+        this.loadTrack(e.target.value);
+        if (this.gameState === 'PLAYING') {
+          this.renderer.showBanner(`STAGE CHANGED: ${this.road.currentCourseName}`, 2.2, '#33ccff');
+        }
+      });
+    }
+
+    // Car Selector
+    const carSelect = document.getElementById('carSelect');
+    if (carSelect) {
+      carSelect.addEventListener('change', (e) => {
+        this.player.setCar(e.target.value);
+        const name = this.player.carSpecs[e.target.value]?.name || 'LOTUS';
+        this.renderer.showBanner(`VEHICLE: ${name}`, 2.0, '#ffaa00');
+      });
+    }
+
     // Touch controls for mobile / tablet
     this.setupTouchControls();
 
     this.loop.start();
+  }
+
+  loadTrack(courseKey) {
+    this.currentCourseKey = courseKey;
+    this.player.reset();
+    this.road.reset();
+
+    if (courseKey === 'roadworks') {
+      this.road.currentCourseName = 'ROADWORKS (공사장)';
+      buildRoadworksTrack(this.road);
+    } else if (courseKey === 'snow') {
+      this.road.currentCourseName = 'SNOW BLIZZARD (설원)';
+      buildSnowTrack(this.road);
+    } else {
+      this.road.currentCourseName = 'FOREST (자연풍경)';
+      buildForestTrack(this.road);
+    }
+
+    this.rivals.init(this.road.segments);
+  }
+
+  tuneNextRadio() {
+    this.audio.init();
+    this.audio.resume();
+    const stationName = this.audio.nextStation();
+    const radioBtn = document.getElementById('radioBtn');
+    if (radioBtn) radioBtn.textContent = `📻 ${stationName}`;
+    this.renderer.showBanner(`📻 RADIO: ${stationName}`, 2.2, '#00e676');
   }
 
   setupTouchControls() {
@@ -88,7 +147,7 @@ class LotusGame {
         if (this.gameState === 'SPLASH') {
           this.audio.init();
           this.audio.resume();
-          this.audio.playBGM('forest');
+          this.audio.playBGM('lotus3_radio_mix');
           this.gameState = 'PLAYING';
           const splashEl = document.getElementById('splashScreen');
           if (splashEl) splashEl.style.display = 'none';
@@ -113,15 +172,19 @@ class LotusGame {
 
   restart() {
     this.player.reset();
-    this.road.reset();
-    buildForestTrack(this.road);
-    this.rivals.init(this.road.segments);
+    this.loadTrack(this.currentCourseKey);
     this.gameState = 'PLAYING';
-    this.renderer.showBanner('STAGE 1: FOREST - GO!', 2.0, '#00ff66');
+    this.renderer.showBanner(`STAGE: ${this.road.currentCourseName} - GO!`, 2.0, '#00ff66');
   }
 
   update(dt) {
     this.input.pollGamepad();
+
+    // In-game radio change on key 'R'
+    if (this.input.keys.radio) {
+      this.input.keys.radio = false;
+      this.tuneNextRadio();
+    }
 
     if (this.gameState === 'GAMEOVER' || this.gameState === 'FINISHED') {
       if (this.input.keys.brake || this.input.keys.up) {
@@ -151,28 +214,33 @@ class LotusGame {
       this.player.currentCheckpointIndex = currentSegment.index;
 
       if (currentSegment.timeBonus > 0) {
-        // Checkpoint reached
         this.player.timeRemaining += currentSegment.timeBonus;
         this.audio.playCheckpointChime();
         this.renderer.showBanner(`CHECKPOINT! +${currentSegment.timeBonus} SECONDS`, 2.5, '#ffff00');
       } else {
-        // Finish Line reached!
         this.player.isFinished = true;
         this.gameState = 'FINISHED';
         this.renderer.showBanner('STAGE CLEARED!', 4.0, '#00ff66');
       }
     }
 
-    // Roadside Obstacle Collision (Logs, Rocks)
+    // Roadside Obstacle Collision (Cones, Barricades, Drums, Logs, Rocks)
     for (let spr of currentSegment.sprites) {
-      if (spr.key === 'obstacle_log' || spr.key === 'obstacle_rock') {
-        const segDist = Math.abs((currentSegment.index * CONFIG.SEGMENT_LENGTH) - this.player.z);
-        if (segDist < CONFIG.SEGMENT_LENGTH * 0.8) {
-          const latDist = Math.abs(this.player.x - spr.offset);
-          if (latDist < 0.35) {
-            // Hit obstacle!
+      const segDist = Math.abs((currentSegment.index * CONFIG.SEGMENT_LENGTH) - this.player.z);
+      if (segDist < CONFIG.SEGMENT_LENGTH * 0.8) {
+        const latDist = Math.abs(this.player.x - spr.offset);
+        if (latDist < 0.35) {
+          if (spr.key === 'obstacle_cone') {
+            if (!spr.hit) {
+              spr.hit = true;
+              this.player.hitMinorObstacle();
+              this.audio.playConeHit();
+              this.renderer.showBanner('🚧 CONE HIT!', 0.6, '#ff9900');
+            }
+          } else if (spr.key === 'obstacle_barricade' || spr.key === 'obstacle_drum' || 
+                     spr.key === 'obstacle_log' || spr.key === 'obstacle_rock') {
             this.player.triggerSpin();
-            this.renderer.showBanner('CRASH!', 1.2, '#ff3333');
+            this.renderer.showBanner('💥 CRASH!', 1.2, '#ff3333');
           }
         }
       }
@@ -196,7 +264,8 @@ class LotusGame {
       this.camera,
       this.sprites,
       this.rivals,
-      CONFIG.STEP
+      CONFIG.STEP,
+      this.audio
     );
   }
 
@@ -206,11 +275,11 @@ class LotusGame {
     const h = this.canvas.height;
 
     // Retro Arcade title screen
-    ctx.fillStyle = '#0a101f';
+    ctx.fillStyle = '#080d16';
     ctx.fillRect(0, 0, w, h);
 
-    // Grid effect
-    ctx.strokeStyle = '#183050';
+    // Industrial grid effect
+    ctx.strokeStyle = '#162438';
     ctx.lineWidth = 1;
     for (let y = 0; y < h; y += 20) {
       ctx.beginPath();
@@ -225,32 +294,36 @@ class LotusGame {
       ctx.stroke();
     }
 
-    // Lotus Logo & Title
+    // Lotus III Logo & Title
     ctx.fillStyle = '#ffcc00';
-    ctx.font = 'bold 36px "Courier New", monospace';
+    ctx.font = 'bold 38px "Courier New", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('LOTUS 2', w / 2, h * 0.32);
+    ctx.fillText('LOTUS III', w / 2, h * 0.28);
 
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 20px "Courier New", monospace';
-    ctx.fillText('TURBO CHALLENGE', w / 2, h * 0.42);
+    ctx.fillText('THE ULTIMATE CHALLENGE', w / 2, h * 0.38);
 
-    // Car sprite preview in center
-    const carImg = this.sprites.get('player_straight');
-    if (carImg) {
-      ctx.drawImage(carImg, (w / 2) - 100, h * 0.48, 200, 100);
+    // Featured Car: Lotus M200 Speedster preview in center
+    const m200Img = this.sprites.get('player_m200_straight');
+    if (m200Img) {
+      ctx.drawImage(m200Img, (w / 2) - 100, h * 0.44, 200, 100);
     }
 
-    // Blinking "PRESS SPACE OR CLICK TO START"
+    ctx.fillStyle = '#00e676';
+    ctx.font = 'bold 15px "Courier New", monospace';
+    ctx.fillText('FEATURED: LOTUS M200 SPEEDSTER & ROADWORKS STAGE', w / 2, h * 0.72);
+
+    // Blinking prompt
     if (Math.floor(performance.now() / 400) % 2 === 0) {
-      ctx.fillStyle = '#00ff88';
+      ctx.fillStyle = '#ffdd00';
       ctx.font = 'bold 18px "Courier New", monospace';
-      ctx.fillText('PRESS SPACE OR CLICK TO RACE', w / 2, h * 0.82);
+      ctx.fillText('PRESS SPACE OR CLICK TO START RACE', w / 2, h * 0.83);
     }
 
     ctx.fillStyle = '#88a0b8';
-    ctx.font = '13px "Courier New", monospace';
-    ctx.fillText('Original Music: Barry Leitch | Web Port Engine v1.0', w / 2, h * 0.94);
+    ctx.font = '12px "Courier New", monospace';
+    ctx.fillText('Music: Patrick Phelan & Barry Leitch | MS-DOS Authentic Recreation', w / 2, h * 0.94);
     ctx.textAlign = 'start';
   }
 }

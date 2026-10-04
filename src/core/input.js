@@ -55,11 +55,17 @@ export class InputManager {
       case 'KeyM':
         this.keys.music = true;
         break;
+      case 'KeyR':
+        this.keys.radio = true;
+        break;
     }
   }
 
   onKeyUp(e) {
     switch (e.code) {
+      case 'KeyR':
+        this.keys.radio = false;
+        break;
       case 'ArrowUp':
       case 'KeyW':
         this.keys.up = false;

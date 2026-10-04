@@ -18,6 +18,15 @@ export class RoadManager {
     const n = this.segments.length;
     const isDark = Math.floor(n / CONFIG.RUMBLE_LENGTH) % 2 === 0;
 
+    const theme = this.theme || {};
+    const roadDark = theme.roadDark || CONFIG.COLORS.ROAD_DARK;
+    const roadLight = theme.roadLight || CONFIG.COLORS.ROAD_LIGHT;
+    const rumbleDark = theme.rumbleDark || CONFIG.COLORS.RUMBLE_DARK;
+    const rumbleLight = theme.rumbleLight || CONFIG.COLORS.RUMBLE_LIGHT;
+    const grassDark = theme.grassDark || CONFIG.COLORS.GRASS_DARK;
+    const grassLight = theme.grassLight || CONFIG.COLORS.GRASS_LIGHT;
+    const laneCol = theme.lane !== undefined ? theme.lane : CONFIG.COLORS.LANE_LINE;
+
     this.segments.push({
       index: n,
       p1: {
@@ -34,10 +43,10 @@ export class RoadManager {
       sprites: [],
       cars: [],
       color: {
-        road: isDark ? CONFIG.COLORS.ROAD_DARK : CONFIG.COLORS.ROAD_LIGHT,
-        rumble: isDark ? CONFIG.COLORS.RUMBLE_DARK : CONFIG.COLORS.RUMBLE_LIGHT,
-        grass: isDark ? CONFIG.COLORS.GRASS_DARK : CONFIG.COLORS.GRASS_LIGHT,
-        lane: isDark ? CONFIG.COLORS.LANE_LINE : null
+        road: isDark ? roadDark : roadLight,
+        rumble: isDark ? rumbleDark : rumbleLight,
+        grass: isDark ? grassDark : grassLight,
+        lane: isDark ? laneCol : null
       },
       fog: 0,
       clip: 0

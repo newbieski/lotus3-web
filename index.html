@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Lotus Turbo Challenge 2 - Web Arcade</title>
+  <title>Lotus III: The Ultimate Challenge - Web Arcade</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,10 +11,34 @@
     <!-- Retro Arcade Marquee -->
     <header class="arcade-header">
       <div class="header-logo">
-        <span class="brand-lotus">LOTUS</span>
-        <span class="brand-sub">TURBO CHALLENGE 2</span>
+        <span class="brand-lotus">LOTUS III</span>
+        <span class="brand-sub">THE ULTIMATE CHALLENGE</span>
       </div>
+
+      <!-- Quick Stage & Car Selectors -->
+      <div class="header-selectors">
+        <div class="selector-box">
+          <label for="courseSelect">STAGE:</label>
+          <select id="courseSelect" class="arcade-select">
+            <option value="roadworks" selected>🚧 ROADWORKS (공사장)</option>
+            <option value="forest">🌲 NATURE FOREST (자연풍경)</option>
+            <option value="snow">❄️ SNOW BLIZZARD (설원)</option>
+          </select>
+        </div>
+
+        <div class="selector-box">
+          <label for="carSelect">CAR:</label>
+          <select id="carSelect" class="arcade-select">
+            <option value="m200" selected>🏎️ LOTUS M200 (은색 컨셉카)</option>
+            <option value="esprit">🚗 LOTUS ESPRIT (빨강 터보)</option>
+            <option value="elan">🚙 LOTUS ELAN (녹색 로드스터)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Toolbar Buttons -->
       <div class="header-tools">
+        <button id="radioBtn" class="arcade-btn radio-btn">📻 RADIO FM</button>
         <button id="muteBtn" class="arcade-btn">🔊 SOUND</button>
         <button id="scanlineBtn" class="arcade-btn">📺 CRT: ON</button>
       </div>
@@ -28,14 +52,15 @@
       <!-- Splash / Click-to-Play Overlay -->
       <div id="splashScreen" class="overlay-screen">
         <div class="splash-card">
-          <h1 class="glow-title">LOTUS 2</h1>
-          <h2 class="sub-title">WEB RE-CREATION ENGINE</h2>
-          <div class="lotus-badge">🏁 BRITISH RACING GREEN • ELAN SE 🏁</div>
+          <h1 class="glow-title">LOTUS III</h1>
+          <h2 class="sub-title">THE ULTIMATE CHALLENGE • WEB RECREATION</h2>
+          <div class="lotus-badge">🚧 FIRST DEMO: ROADWORKS (공사장) & LOTUS M200 SPEEDSTER 🚧</div>
           <div class="pulse-start">▶ CLICK OR PRESS SPACE TO START ◀</div>
           <div class="key-guide">
             <span>[⬆ / W] 가속</span>
-            <span>[⬇ / S / Space] 브레이크</span>
+            <span>[⬇ / S / Space] 감속</span>
             <span>[⬅ ➡ / A D] 핸들링</span>
+            <span>[R] 라디오 채널 변경</span>
             <span>[M] 음소거</span>
           </div>
         </div>
@@ -56,9 +81,9 @@
 
     <!-- Footer Specs -->
     <footer class="arcade-footer">
-      <span>Original 1991 Magnetic Fields & Gremlin Graphics</span>
-      <span>Music by Barry Leitch</span>
-      <span>HTML5 Canvas Pseudo-3D Engine</span>
+      <span>Original 1992 Magnetic Fields & Gremlin Graphics</span>
+      <span>Music by Patrick Phelan & Barry Leitch</span>
+      <span>Authentic MS-DOS Lotus III Recreation Engine</span>
     </footer>
   </div>
 

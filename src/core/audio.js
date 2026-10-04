@@ -130,7 +130,69 @@ export class AudioManager {
     }
   }
 
-  playBGM(trackName = 'forest') {
+    // Lotus 3 In-Game Radio Station System
+    this.stations = [
+      { name: 'LOTUS 3 RADIO FM', file: 'lotus3_radio_mix' },
+      { name: 'FOREST BEAT (1992)', file: 'forest' },
+      { name: 'INTERSTATE RUSH', file: 'interstate' },
+      { name: 'STORM CHASER FM', file: 'storm' },
+      { name: 'LOTUS THEME (ORIGINAL)', file: 'title' },
+      { name: 'RADIO OFF (MOTOR ONLY)', file: null }
+    ];
+    this.currentStationIndex = 0;
+  }
+
+  nextStation() {
+    this.currentStationIndex = (this.currentStationIndex + 1) % this.stations.length;
+    const station = this.stations[this.currentStationIndex];
+    this.playRadioStatic();
+
+    if (station.file) {
+      this.playBGM(station.file);
+    } else {
+      if (this.bgm) this.bgm.pause();
+      this.currentTrack = null;
+    }
+    return station.name;
+  }
+
+  getCurrentStationName() {
+    return this.stations[this.currentStationIndex].name;
+  }
+
+  playRadioStatic() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const now = this.ctx.currentTime;
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.08);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.08);
+  }
+
+  playConeHit() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const now = this.ctx.currentTime;
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  }
+
+  playBGM(trackName = 'lotus3_radio_mix') {
     if (this.currentTrack === trackName && this.bgm && !this.bgm.paused) return;
 
     if (this.bgm) {

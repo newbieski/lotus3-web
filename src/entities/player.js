@@ -3,7 +3,19 @@ import { CONFIG } from '../config.js';
 
 export class Player {
   constructor() {
+    this.selectedCar = 'm200'; // Default Lotus 3 hero car: M200 Speedster
+    this.carSpecs = {
+      m200:   { name: 'LOTUS M200',   topSpeedMph: 152, accelMult: 1.15, steerMult: 1.1 },
+      esprit: { name: 'LOTUS ESPRIT', topSpeedMph: 156, accelMult: 1.25, steerMult: 0.95 },
+      elan:   { name: 'LOTUS ELAN',   topSpeedMph: 142, accelMult: 1.0,  steerMult: 1.15 }
+    };
     this.reset();
+  }
+
+  setCar(carKey) {
+    if (this.carSpecs[carKey]) {
+      this.selectedCar = carKey;
+    }
   }
 
   reset() {
@@ -112,8 +124,15 @@ export class Player {
     }
   }
 
+  hitMinorObstacle() {
+    // Traffic cone knocked over
+    this.speed *= 0.92;
+    this.steer += (Math.random() > 0.5 ? 0.3 : -0.3);
+  }
+
   getSpeedMph() {
-    return Math.round((this.speed / CONFIG.MAX_SPEED) * 142); // 142 MPH top speed
+    const spec = this.carSpecs[this.selectedCar] || this.carSpecs.m200;
+    return Math.round((this.speed / CONFIG.MAX_SPEED) * spec.topSpeedMph);
   }
 
   getRPM() {
@@ -121,7 +140,7 @@ export class Player {
     return Math.round(1200 + ratio * 6800); // 1200 - 8000 RPM
   }
 
-  // Get active sprite key based on steering angle, slope, braking
+  // Get active sprite key based on steering angle, slope, braking, and selectedCar
   getSpriteKey(isUphill = false) {
     let steerSuffix = 'straight';
     if (this.steer < -1.2) steerSuffix = 'hard_left';
@@ -129,12 +148,12 @@ export class Player {
     else if (this.steer > 1.2) steerSuffix = 'hard_right';
     else if (this.steer > 0.3) steerSuffix = 'right';
 
-    if (this.isBraking) {
-      return `player_${steerSuffix}_brake`;
+    const mod = this.isBraking ? '_brake' : (isUphill ? '_up' : '');
+    
+    if (this.selectedCar === 'elan') {
+      return `player_${steerSuffix}${mod}`;
+    } else {
+      return `player_${this.selectedCar}_${steerSuffix}${mod}`;
     }
-    if (isUphill) {
-      return `player_${steerSuffix}_up`;
-    }
-    return `player_${steerSuffix}`;
   }
 }

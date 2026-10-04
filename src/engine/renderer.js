@@ -25,7 +25,7 @@ export class Renderer {
     this.bannerColor = color;
   }
 
-  render(road, player, camera, spriteManager, rivalManager, dt) {
+  render(road, player, camera, spriteManager, rivalManager, dt, audio) {
     const ctx = this.ctx;
     const width = this.width;
     const height = this.height;
@@ -131,8 +131,8 @@ export class Renderer {
     // 4. Render Player Lotus Elan SE
     this.renderPlayer(ctx, player, baseSegment, spriteManager, width, height);
 
-    // 5. Render Lotus 2 Arcade HUD & Dashboard
-    this.renderHUD(ctx, player, width, height);
+    // 5. Render Lotus 3 Arcade HUD & Dashboard
+    this.renderHUD(ctx, player, road, width, height);
 
     // 6. Notification Banners
     if (this.bannerTimer > 0) {
@@ -153,8 +153,12 @@ export class Renderer {
     this.hillOffset = (this.hillOffset + curve * 0.45 * speedRatio) % width;
     this.treeOffset = (this.treeOffset + curve * 0.95 * speedRatio) % width;
 
+    const theme = road.theme || {};
+    const skyKey = theme.sky || 'bg_sky';
+    const skylineKey = theme.skyline || 'bg_mountains';
+
     // 1. Sky
-    const sky = spriteManager.get('bg_sky');
+    const sky = spriteManager.get(skyKey) || spriteManager.get('bg_sky');
     if (sky) {
       this.drawParallaxLayer(ctx, sky, this.skyOffset, 0, width, height * 0.58);
     } else {
@@ -162,16 +166,36 @@ export class Renderer {
       ctx.fillRect(0, 0, width, height * 0.58);
     }
 
-    // 2. Mountains
-    const mtn = spriteManager.get('bg_mountains');
+    // 2. Mid Skyline (Cranes / Mountains)
+    const mtn = spriteManager.get(skylineKey) || spriteManager.get('bg_mountains');
     if (mtn) {
       this.drawParallaxLayer(ctx, mtn, this.hillOffset, height * 0.18, width, height * 0.38);
     }
 
-    // 3. Forest Horizon
-    const fst = spriteManager.get('bg_forest_hills');
-    if (fst) {
-      this.drawParallaxLayer(ctx, fst, this.treeOffset, height * 0.28, width, height * 0.30);
+    // 3. Near Horizon (Forest hills if not roadworks)
+    if (!theme.skyline || theme.skyline === 'bg_mountains') {
+      const fst = spriteManager.get('bg_forest_hills');
+      if (fst) {
+        this.drawParallaxLayer(ctx, fst, this.treeOffset, height * 0.28, width, height * 0.30);
+      }
+    }
+
+    // 4. Falling Snow Weather Effect
+    if (theme.isSnow) {
+      this.renderSnow(ctx, width, height);
+    }
+  }
+
+  renderSnow(ctx, width, height) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    const t = performance.now() * 0.002;
+    for (let i = 0; i < 60; i++) {
+      const sx = (Math.sin(i * 99 + t) * 0.5 + 0.5) * width;
+      const sy = ((i * 17 + t * 120) % height);
+      const r = 1.5 + (i % 3);
+      ctx.beginPath();
+      ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 
@@ -305,9 +329,9 @@ export class Renderer {
     ctx.drawImage(carImg, carX, carY, carW, carH);
   }
 
-  renderHUD(ctx, player, width, height) {
-    // Lotus 2 Authentic Arcade HUD Bar at top
-    ctx.fillStyle = 'rgba(10, 16, 26, 0.88)';
+  renderHUD(ctx, player, road, width, height) {
+    // Lotus 3 Authentic Arcade HUD Bar at top
+    ctx.fillStyle = 'rgba(10, 16, 26, 0.92)';
     ctx.fillRect(0, 0, width, 48);
     ctx.fillStyle = '#ffcc00';
     ctx.fillRect(0, 47, width, 2);
@@ -317,49 +341,50 @@ export class Renderer {
     // 1. SPEED (MPH)
     const speed = player.getSpeedMph();
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('SPEED', 20, 20);
+    ctx.fillText('SPEED', 15, 18);
     ctx.fillStyle = '#ffdd33';
-    ctx.font = 'bold 20px "Courier New", monospace';
-    ctx.fillText(`${speed.toString().padStart(3, ' ')} MPH`, 20, 40);
+    ctx.font = 'bold 19px "Courier New", monospace';
+    ctx.fillText(`${speed.toString().padStart(3, ' ')} MPH`, 15, 38);
 
     // 2. RPM Bar
     ctx.font = 'bold 12px "Courier New", monospace';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('RPM', 130, 18);
+    ctx.fillText('RPM', 115, 18);
     const rpmRatio = (player.getRPM() - 1200) / 6800;
-    const barW = 100;
+    const barW = 85;
     ctx.fillStyle = '#222222';
-    ctx.fillRect(130, 24, barW, 12);
+    ctx.fillRect(115, 24, barW, 12);
     ctx.fillStyle = rpmRatio > 0.85 ? '#ff2222' : (rpmRatio > 0.6 ? '#ffaa00' : '#00dd44');
-    ctx.fillRect(130, 24, barW * Math.min(1.0, Math.max(0, rpmRatio)), 12);
+    ctx.fillRect(115, 24, barW * Math.min(1.0, Math.max(0, rpmRatio)), 12);
     ctx.strokeStyle = '#666666';
-    ctx.strokeRect(130, 24, barW, 12);
+    ctx.strokeRect(115, 24, barW, 12);
 
     // 3. TIME REMAINING
     const timeSec = Math.ceil(player.timeRemaining);
-    ctx.font = 'bold 15px "Courier New", monospace';
+    ctx.font = 'bold 14px "Courier New", monospace';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('TIME', 280, 20);
+    ctx.fillText('TIME', 230, 18);
     ctx.font = 'bold 22px "Courier New", monospace';
     ctx.fillStyle = timeSec <= 10 ? (Math.floor(performance.now() / 250) % 2 === 0 ? '#ff1111' : '#ffffff') : '#00ff66';
-    ctx.fillText(`${timeSec.toString().padStart(2, '0')}`, 280, 42);
+    ctx.fillText(`${timeSec.toString().padStart(2, '0')}`, 230, 40);
 
-    // 4. STAGE TITLE
-    ctx.font = 'bold 15px "Courier New", monospace';
+    // 4. STAGE TITLE (ROADWORKS, FOREST, SNOW)
+    ctx.font = 'bold 13px "Courier New", monospace';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('COURSE', 380, 20);
+    ctx.fillText('COURSE', 320, 18);
     ctx.fillStyle = '#33ccff';
-    ctx.font = 'bold 16px "Courier New", monospace';
-    ctx.fillText('1 - FOREST', 380, 40);
+    ctx.font = 'bold 14px "Courier New", monospace';
+    const stageName = road.currentCourseName || 'ROADWORKS';
+    ctx.fillText(stageName, 320, 38);
 
-    // 5. LAP / DISTANCE PROGRESS
-    ctx.font = 'bold 15px "Courier New", monospace';
+    // 5. CAR MODEL (M200, ESPRIT, ELAN)
+    ctx.font = 'bold 13px "Courier New", monospace';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('PROGRESS', 510, 20);
-    const distM = Math.floor(player.z / 100);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 16px "Courier New", monospace';
-    ctx.fillText(`${distM}m`, 510, 40);
+    ctx.fillText('VEHICLE', 490, 18);
+    const carName = player.carSpecs[player.selectedCar]?.name || 'LOTUS M200';
+    ctx.fillStyle = '#ffaa00';
+    ctx.font = 'bold 14px "Courier New", monospace';
+    ctx.fillText(carName, 490, 38);
 
     // Game Over Overlay
     if (player.isGameOver) {
