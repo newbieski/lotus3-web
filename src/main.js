@@ -134,6 +134,9 @@ class LotusGame {
       this.audio.playLandingThud();
       this.renderer.spawnDust(this.canvas.width / 2 + (this.player.steer * 32), this.canvas.height - 25);
     };
+    this.rivals.onBumpCallback = (car) => {
+      this.audio.playCarBump();
+    };
 
     // Touch controls for mobile / tablet
     this.setupTouchControls();

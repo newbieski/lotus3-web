@@ -57,17 +57,24 @@ export class RivalManager {
         newSegment.cars.push(car);
       }
 
-      // Check collision with player
+      // Check collision with player (Scaled to match wider authentic Lotus 3 car body)
       const distZ = Math.abs(car.z - player.z);
       if (distZ < CONFIG.SEGMENT_LENGTH * 1.5) {
         const diffX = Math.abs(car.offset - player.x);
-        if (diffX < 0.45) {
+        if (diffX < 0.52) {
           // Bump collision!
-          if (player.speed > car.speed) {
-            player.speed = car.speed * 0.85;
+          if (this.onBumpCallback && !car.recentlyHit) {
+            car.recentlyHit = true;
+            setTimeout(() => { car.recentlyHit = false; }, 350);
+            this.onBumpCallback(car);
           }
-          // Push player sideways
-          player.x += (player.x > car.offset ? 0.2 : -0.2);
+          if (player.speed > car.speed) {
+            player.speed = Math.max(car.speed * 0.85, player.speed - 2000 * dt);
+          }
+          // Push player and rival slightly sideways
+          const push = player.x > car.offset ? 0.18 : -0.18;
+          player.x += push;
+          car.offset -= push * 0.6;
         }
       }
     }

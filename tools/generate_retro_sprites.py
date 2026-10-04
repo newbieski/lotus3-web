@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate retro 16-bit arcade sprites for Lotus 2 Web Engine:
+Generate retro 16-bit arcade sprites for Lotus 3 (Lotus III: The Ultimate Challenge) Web Engine:
 - Lotus Elan SE (Player car: straight, steer left, steer right, braking, uphill, downhill)
 - Rival Cars (Red, Yellow, Blue, White)
 - Roadside objects: Forest Tree 1, Forest Tree 2, Rock, Wood Log, Warning Signs, Checkpoint Banner
@@ -174,7 +174,7 @@ def generate_car_variations():
     print("Car sprites generated!")
 
 def generate_environment_sprites():
-    # 1. Tall Pine Tree (Lotus 2 signature Forest Tree)
+    # 1. Tall Pine Tree (Lotus 3 signature Forest Tree)
     w, h = 180, 320
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
@@ -234,7 +234,7 @@ def generate_environment_sprites():
         d2.ellipse([x - r*0.5, y - r*0.7, x + r*0.2, y - r*0.1], fill="#63d17b")
     im2.save(os.path.join(SPRITES_DIR, "tree_deciduous.png"))
 
-    # 3. Wood Log (Lotus 2 signature road obstacle)
+    # 3. Wood Log (Lotus 3 signature road obstacle)
     im3 = Image.new("RGBA", (160, 60), (0, 0, 0, 0))
     d3 = ImageDraw.Draw(im3)
     # Log cylinder
@@ -292,7 +292,7 @@ def generate_environment_sprites():
     # Banner Text Area
     dg.rectangle([55, 28, 425, 75], fill="#ffffff")
     dg.rectangle([58, 31, 422, 72], fill="#0a5c2d") # Lotus British Green banner
-    dg.text((80, 38), "LOTUS TURBO CHALLENGE 2", fill="#ffea00", stroke_width=2, stroke_fill="#000000")
+    dg.text((55, 38), "LOTUS III: ULTIMATE CHALLENGE", fill="#ffea00", stroke_width=2, stroke_fill="#000000")
     im_gantry.save(os.path.join(SPRITES_DIR, "gantry_start.png"))
 
     # Checkpoint Banner

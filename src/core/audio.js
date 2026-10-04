@@ -255,6 +255,22 @@ export class AudioManager {
     osc.stop(now + 0.06);
   }
 
+  playCarBump() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const now = this.ctx.currentTime;
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + 0.12);
+    gain.gain.setValueAtTime(0.22, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  }
+
   playBGM(trackName = 'lotus3_radio_mix') {
     if (this.currentTrack === trackName && this.bgm && !this.bgm.paused) return;
 

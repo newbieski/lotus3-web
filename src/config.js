@@ -1,4 +1,4 @@
-// Game Constants & Configuration for Lotus 2 Web Engine
+// Game Constants & Configuration for Lotus 3 (Lotus III: The Ultimate Challenge) Web Engine
 export const CONFIG = {
   // Display
   SCREEN_WIDTH: 640,

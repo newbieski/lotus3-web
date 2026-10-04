@@ -154,14 +154,14 @@ export class Renderer {
         }
       }
 
-      // Draw rival cars on this segment
+      // Draw rival cars on this segment (Using dedicated Lotus 3 vehicle scaling)
       for (let car of segment.cars) {
         const carImg = spriteManager.get(rivalManager.getSpriteKey(car));
         if (carImg) {
           const carScale = segment.p1.screen.scale;
           const carX = segment.p1.screen.x + (carScale * car.offset * CONFIG.ROAD_WIDTH * width / 2);
           const carY = segment.p1.screen.y;
-          this.renderSprite(ctx, carImg, carX, carY, carScale, segment.clip, width, height);
+          this.renderRivalCar(ctx, carImg, carX, carY, carScale, segment.clip, width, height);
         }
       }
     }
@@ -380,6 +380,41 @@ export class Renderer {
     // Check if sprite is above scanline clipping (crest of hill)
     const clipH = clipY ? Math.max(0, (y + destH) - clipY) : 0;
     if (clipH >= destH) return; // Completely hidden behind hill
+
+    if (clipH > 0) {
+      // Draw partially clipped at hill crest
+      const visibleH = destH - clipH;
+      const sourceVisibleH = (visibleH / destH) * img.height;
+      ctx.drawImage(img, 0, 0, img.width, sourceVisibleH, x, y, destW, visibleH);
+    } else {
+      ctx.drawImage(img, x, y, destW, destH);
+    }
+  }
+
+  renderRivalCar(ctx, img, destX, destY, scale, clipY, width, height) {
+    // Authentic Lotus 3 Arcade Rival Scaling:
+    // Scale rival vehicles so they match the player's Lotus scale (up to 216px near, and bold ~115px in mid-distance)
+    const arcadeBoost = 1.85;
+    const rawW = (img.width * scale * width / 2) * (CONFIG.ROAD_WIDTH / 1000) * arcadeBoost;
+    const destW = Math.min(220, rawW);
+    const destH = destW * (img.height / img.width);
+
+    const x = destX - destW / 2;
+    const y = destY - destH;
+
+    // Check if sprite is above scanline clipping (crest of hill)
+    const clipH = clipY ? Math.max(0, (y + destH) - clipY) : 0;
+    if (clipH >= destH) return; // Completely hidden behind hill
+
+    // Draw asphalt contact shadow beneath tires
+    if (clipH === 0 && destW > 14) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.40)';
+      ctx.beginPath();
+      ctx.ellipse(x + destW / 2, y + destH - 1, destW * 0.44, Math.max(2, destH * 0.11), 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
 
     if (clipH > 0) {
       // Draw partially clipped at hill crest
