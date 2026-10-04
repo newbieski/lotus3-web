@@ -322,8 +322,32 @@ export class Renderer {
       segment.color.road
     );
 
-    // Center Dashed White/Yellow Stripe
-    if (segment.color.lane) {
+    // Authentic Checkered Start Line (Segments 2-4) or Finish Line
+    if ((segment.index >= 2 && segment.index <= 4) || segment.isFinishLine) {
+      const checkCols = 10;
+      const w1 = (2 * p1.w) / checkCols;
+      const w2 = (2 * p2.w) / checkCols;
+      for (let c = 0; c < checkCols; c++) {
+        const isWhite = (c + segment.index) % 2 === 0;
+        this.drawPolygon(ctx,
+          p1.x - p1.w + c * w1, p1.y,
+          p1.x - p1.w + (c + 1) * w1, p1.y,
+          p2.x - p2.w + (c + 1) * w2, p2.y,
+          p2.x - p2.w + c * w2, p2.y,
+          isWhite ? '#ffffff' : '#111111'
+        );
+      }
+    } else if (segment.isCheckpoint) {
+      // Checkpoint Glowing Yellow Stripe across road surface
+      this.drawPolygon(ctx,
+        p1.x - p1.w, p1.y,
+        p1.x + p1.w, p1.y,
+        p2.x + p2.w, p2.y,
+        p2.x - p2.w, p2.y,
+        '#ffee00'
+      );
+    } else if (segment.color.lane) {
+      // Center Dashed Stripe
       this.drawPolygon(ctx,
         p1.x - l1, p1.y,
         p1.x + l1, p1.y,

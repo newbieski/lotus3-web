@@ -119,14 +119,39 @@ export class RoadManager {
     if (this.segments[n]) {
       this.segments[n].isCheckpoint = true;
       this.segments[n].timeBonus = timeBonus;
-      // Add overhead checkpoint banner
-      this.addSprite(n, 'gantry_checkpoint', 0);
+      // Authentic Lotus 3: Checkpoint markers on the road shoulders (never blocking the driving lanes!)
+      this.addSprite(n, 'sign_chevron_left', -1.35);
+      this.addSprite(n, 'sign_chevron_right', 1.35);
+      if (timeBonus === 0) {
+        // Mark finish line checkered grid across 4 segments
+        for (let i = Math.max(0, n - 3); i <= n; i++) {
+          this.segments[i].isFinishLine = true;
+        }
+      }
       this.checkpoints.push({ index: n, z: n * CONFIG.SEGMENT_LENGTH, timeBonus });
+    }
+  }
+
+  markCheckpoint(timeBonus = 45) {
+    const idx = this.segments.length - 1;
+    if (idx >= 0) {
+      this.addCheckpoint(idx, timeBonus);
+    }
+  }
+
+  markFinish() {
+    const idx = this.segments.length - 1;
+    if (idx >= 0) {
+      this.addCheckpoint(idx, 0);
     }
   }
 
   finishBuilding() {
     this.trackLength = this.segments.length * CONFIG.SEGMENT_LENGTH;
+    const lastIdx = this.segments.length - 1;
+    if (lastIdx > 0 && !this.checkpoints.some(c => c.timeBonus === 0)) {
+      this.addCheckpoint(lastIdx, 0);
+    }
   }
 
   findSegment(z) {

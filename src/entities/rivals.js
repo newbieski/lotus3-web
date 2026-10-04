@@ -11,13 +11,14 @@ export class RivalManager {
     const colors = ['red', 'yellow', 'blue', 'white'];
     const totalSegments = roadSegments.length;
 
-    // Distribute rival cars along track
-    const spawnDistances = [80, 160, 260, 420, 600, 750, 950, 1100, 1300];
-
-    spawnDistances.forEach((segIndex, i) => {
+    // Distribute rival cars evenly along the entire championship track length
+    const carCount = Math.min(36, Math.max(12, Math.floor(totalSegments / 150)));
+    for (let i = 0; i < carCount; i++) {
+      const segIndex = 70 + Math.floor(i * ((totalSegments - 140) / carCount)) + Math.floor(Math.random() * 25);
+      if (segIndex >= totalSegments - 30) break;
       const color = colors[i % colors.length];
-      const laneOffset = (i % 2 === 0 ? -0.5 : 0.5) + (Math.random() * 0.2 - 0.1);
-      const speed = CONFIG.MAX_SPEED * (0.65 + Math.random() * 0.22);
+      const laneOffset = (i % 2 === 0 ? -0.48 : 0.48) + (Math.random() * 0.24 - 0.12);
+      const speed = CONFIG.MAX_SPEED * (0.68 + Math.random() * 0.20);
 
       this.cars.push({
         id: i,
@@ -28,7 +29,7 @@ export class RivalManager {
         percent: 0,
         steer: 0
       });
-    });
+    }
   }
 
   update(dt, road, player) {

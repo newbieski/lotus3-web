@@ -235,7 +235,19 @@ class LotusGame {
       this.renderer.showBanner(`TRANSMISSION: ${mode}`, 1.2, '#33ccff');
     }
 
-    if (this.gameState === 'GAMEOVER' || this.gameState === 'FINISHED') {
+    if (this.gameState === 'FINISHED') {
+      // Smoothly coast vehicle down to a stop after finish line
+      this.player.speed = Math.max(0, this.player.speed - 3200 * dt);
+      this.player.z += this.player.speed * dt;
+      this.player.x *= 0.98;
+      this.rivals.update(dt, this.road, this.player);
+      if (this.input.keys.brake || this.input.keys.up) {
+        this.restart();
+      }
+      return;
+    }
+
+    if (this.gameState === 'GAMEOVER') {
       if (this.input.keys.brake || this.input.keys.up) {
         this.restart();
       }
