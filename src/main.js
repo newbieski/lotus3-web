@@ -35,21 +35,20 @@ class LotusGame {
     this.init();
   }
 
-  async init() {
-    console.log('Loading Lotus 3 assets...');
-    await this.sprites.loadAll();
-    console.log('Lotus 3 assets loaded successfully.');
-
     // Build Default Course: ROADWORKS (공사장)
     this.loadTrack(this.currentCourseKey);
 
-    // Setup Start Overlay listener
+    // Setup Start Overlay listener immediately
     const splashEl = document.getElementById('splashScreen');
     const startAction = () => {
       if (this.gameState === 'SPLASH') {
-        this.audio.init();
-        this.audio.resume();
-        this.audio.playBGM('lotus3_radio_mix');
+        try {
+          this.audio.init();
+          this.audio.resume();
+          this.audio.playBGM('lotus3_radio_mix');
+        } catch (e) {
+          console.warn('Audio init error (non-fatal):', e);
+        }
         this.gameState = 'PLAYING';
         if (splashEl) splashEl.style.display = 'none';
         this.renderer.showBanner(`STAGE: ${this.road.currentCourseName} - GO!`, 2.5, '#00ff66');
@@ -59,11 +58,21 @@ class LotusGame {
     if (splashEl) {
       splashEl.addEventListener('click', startAction);
     }
+    this.canvas.addEventListener('click', startAction);
+
     window.addEventListener('keydown', (e) => {
-      if (this.gameState === 'SPLASH' && (e.code === 'Space' || e.code === 'Enter')) {
+      if (this.gameState === 'SPLASH' && (e.code === 'Space' || e.key === ' ' || e.code === 'Enter' || e.code === 'ArrowUp' || e.key === 'w')) {
+        e.preventDefault();
         startAction();
       }
     });
+
+    // Start game loop right away so splash / canvas is responsive
+    this.loop.start();
+
+    console.log('Loading Lotus 3 assets...');
+    await this.sprites.loadAll();
+    console.log('Lotus 3 assets loaded successfully.');
 
     // Mute button
     const muteBtn = document.getElementById('muteBtn');
@@ -105,8 +114,6 @@ class LotusGame {
 
     // Touch controls for mobile / tablet
     this.setupTouchControls();
-
-    this.loop.start();
   }
 
   loadTrack(courseKey) {

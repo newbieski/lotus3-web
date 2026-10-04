@@ -15,6 +15,17 @@ export class AudioManager {
     // Screech synth
     this.screechGain = null;
     this.screechNoise = null;
+
+    // Lotus 3 In-Game Radio Station System
+    this.stations = [
+      { name: 'LOTUS 3 RADIO FM', file: 'lotus3_radio_mix' },
+      { name: 'FOREST BEAT (1992)', file: 'forest' },
+      { name: 'INTERSTATE RUSH', file: 'interstate' },
+      { name: 'STORM CHASER FM', file: 'storm' },
+      { name: 'LOTUS THEME (ORIGINAL)', file: 'title' },
+      { name: 'RADIO OFF (MOTOR ONLY)', file: null }
+    ];
+    this.currentStationIndex = 0;
   }
 
   init() {
@@ -128,18 +139,6 @@ export class AudioManager {
       const screechVol = isScreeching ? 0.12 : (isBraking && speedRatio > 0.3 ? 0.08 : 0.0);
       this.screechGain.gain.setTargetAtTime(this.isMuted ? 0 : screechVol, now, 0.04);
     }
-  }
-
-    // Lotus 3 In-Game Radio Station System
-    this.stations = [
-      { name: 'LOTUS 3 RADIO FM', file: 'lotus3_radio_mix' },
-      { name: 'FOREST BEAT (1992)', file: 'forest' },
-      { name: 'INTERSTATE RUSH', file: 'interstate' },
-      { name: 'STORM CHASER FM', file: 'storm' },
-      { name: 'LOTUS THEME (ORIGINAL)', file: 'title' },
-      { name: 'RADIO OFF (MOTOR ONLY)', file: null }
-    ];
-    this.currentStationIndex = 0;
   }
 
   nextStation() {
