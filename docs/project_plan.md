@@ -1,7 +1,7 @@
-# Lotus 2 (Lotus Turbo Challenge 2) Web Porting Project Plan & Progress
+# Lotus 3 (Lotus III: The Ultimate Challenge) Web Porting Project Plan & Progress
 
 ## 1. 프로젝트 개요
-1991년 Gremlin Graphics / Magnetic Fields에서 출시한 명작 레이싱 게임 **Lotus Turbo Challenge 2**의 웹 브라우저 이식 프로젝트입니다.
+1992년 Gremlin Graphics / Magnetic Fields에서 출시하고 MS-DOS로 이식되어 전 세계 및 국내에서 큰 인기를 얻은 명작 레이싱 게임 **Lotus III: The Ultimate Challenge**의 웹 브라우저 이식 프로젝트입니다.
 
 ---
 

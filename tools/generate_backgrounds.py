@@ -10,7 +10,7 @@ import os
 import math
 from PIL import Image, ImageDraw
 
-SPRITES_DIR = os.path.expanduser("/Users/taehun/lotus2-web/assets/sprites")
+SPRITES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "sprites"))
 
 def generate_backgrounds():
     w = 1280

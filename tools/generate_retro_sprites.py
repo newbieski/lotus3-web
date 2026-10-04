@@ -10,7 +10,7 @@ Generate retro 16-bit arcade sprites for Lotus 2 Web Engine:
 import os
 from PIL import Image, ImageDraw
 
-SPRITES_DIR = os.path.expanduser("/Users/taehun/lotus2-web/assets/sprites")
+SPRITES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "sprites"))
 os.makedirs(SPRITES_DIR, exist_ok=True)
 
 def create_car_sprite(color_body="#006b3c", color_highlight="#109e58", color_shadow="#004325", 

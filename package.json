@@ -1,0 +1,21 @@
+{
+  "name": "lotus3-web",
+  "version": "1.0.0",
+  "description": "Lotus III: The Ultimate Challenge (1992) HTML5 Canvas & Web Audio Recreation Engine",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8080"
+  },
+  "keywords": [
+    "lotus",
+    "lotus3",
+    "retro-gaming",
+    "pseudo-3d",
+    "raster-road",
+    "canvas",
+    "web-audio"
+  ],
+  "author": "Antigravity & User",
+  "license": "MIT"
+}
