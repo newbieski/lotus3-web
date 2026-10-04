@@ -60,7 +60,7 @@ def create_car_sprite(color_body="#006b3c", color_highlight="#109e58", color_sha
 
     # Main Car Body (Lotus Elan sleek aerodynamic wedge)
     # Bumper and Lower rear
-    tilt = steer * 4
+    tilt = steer * 7
     by1 = base_y - 14
     by2 = base_y + 6
     

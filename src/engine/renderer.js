@@ -303,6 +303,8 @@ export class Renderer {
     const carImg = spriteManager.get(spriteKey);
     if (!carImg) return;
 
+    const speedRatio = player.speed / CONFIG.MAX_SPEED;
+
     // Engine/road bounce
     let bounce = 0;
     if (player.speed > 0) {
@@ -314,19 +316,34 @@ export class Renderer {
     const scale = 1.35;
     const carW = carImg.width * scale;
     const carH = carImg.height * scale;
-    const carX = (width / 2) - (carW / 2) + (player.steer * 4);
-    const carY = height - carH - 18 + bounce;
+
+    // Dynamic Chassis Physics:
+    // 1. Steering lateral shift (car body shifts dynamically in steering direction)
+    const steerShift = player.steer * 32;
+    // 2. Chassis body roll (banking angle into turn + centrifugal curve lean)
+    const curveInfluence = currentSegment ? (currentSegment.curve || 0) * 0.02 * speedRatio : 0;
+    const rollAngle = (player.steer * 0.042) + curveInfluence;
+    // 3. Dynamic suspension squat under acceleration, dive under braking
+    const suspensionPitch = player.isBraking ? -3 : (player.speed > 500 ? 2 : 0);
+
+    const centerX = (width / 2) + steerShift;
+    const centerY = height - (carH / 2) - 18 + bounce + suspensionPitch;
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(rollAngle);
 
     // Exhaust smoke puffs when accelerating at speed
     if (player.speed > 1000 && !player.isBraking && Math.random() < 0.4) {
       ctx.fillStyle = 'rgba(230, 230, 230, 0.45)';
       ctx.beginPath();
-      ctx.arc(carX + carW * 0.45, carY + carH - 4, 3 + Math.random() * 4, 0, Math.PI * 2);
-      ctx.arc(carX + carW * 0.55, carY + carH - 4, 3 + Math.random() * 4, 0, Math.PI * 2);
+      ctx.arc(-carW * 0.05, carH * 0.45, 3 + Math.random() * 4, 0, Math.PI * 2);
+      ctx.arc(carW * 0.05, carH * 0.45, 3 + Math.random() * 4, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    ctx.drawImage(carImg, carX, carY, carW, carH);
+    ctx.drawImage(carImg, -carW / 2, -carH / 2, carW, carH);
+    ctx.restore();
   }
 
   renderHUD(ctx, player, road, width, height) {

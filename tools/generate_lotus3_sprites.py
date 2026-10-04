@@ -33,22 +33,22 @@ def create_m200_sprite(steer=0, uphill=0, braking=False):
 
     cx = w // 2
     base_y = 56 + (uphill * -3)
-    tilt = steer * 4
+    tilt = steer * 7
 
     # Shadow
-    d.ellipse([cx - 58, base_y + 4, cx + 58, base_y + 18], fill=(0, 0, 0, 120))
+    d.ellipse([cx - 58 + steer*2, base_y + 4, cx + 58 + steer*2, base_y + 18], fill=(0, 0, 0, 120))
 
-    # Wide Low-Profile Racing Tires
+    # Wide Low-Profile Racing Tires with dynamic camber
     tire_col = "#111111"
     rim_col = "#999999"
     # Left tire
-    lt1, lt2 = cx - 58 + steer*2, cx - 38 + steer*2
-    d.rounded_rectangle([lt1, base_y - 6, lt2, base_y + 14], radius=3, fill=tire_col)
-    d.rectangle([lt1 + 4, base_y - 1, lt2 - 4, base_y + 10], fill=rim_col)
+    lt1, lt2 = cx - 58 + steer*3, cx - 38 + steer*3
+    d.rounded_rectangle([lt1, base_y - 6 + steer, lt2, base_y + 14 + steer], radius=3, fill=tire_col)
+    d.rectangle([lt1 + 4, base_y - 1 + steer, lt2 - 4, base_y + 10 + steer], fill=rim_col)
     # Right tire
-    rt1, rt2 = cx + 38 + steer*2, cx + 58 + steer*2
-    d.rounded_rectangle([rt1, base_y - 6, rt2, base_y + 14], radius=3, fill=tire_col)
-    d.rectangle([rt1 + 4, base_y - 1, rt2 - 4, base_y + 10], fill=rim_col)
+    rt1, rt2 = cx + 38 + steer*3, cx + 58 + steer*3
+    d.rounded_rectangle([rt1, base_y - 6 - steer, rt2, base_y + 14 - steer], radius=3, fill=tire_col)
+    d.rectangle([rt1 + 4, base_y - 1 - steer, rt2 - 4, base_y + 10 - steer], fill=rim_col)
 
     # Silver futuristic body
     body_silver = "#b8bcc4"
