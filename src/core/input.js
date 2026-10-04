@@ -49,8 +49,12 @@ export class InputManager {
         break;
       case 'ShiftLeft':
       case 'ShiftRight':
+      case 'KeyX':
         this.keys.gear = true;
         e.preventDefault();
+        break;
+      case 'KeyG':
+        this.keys.toggleTrans = true;
         break;
       case 'KeyM':
         this.keys.music = true;
@@ -87,7 +91,11 @@ export class InputManager {
         break;
       case 'ShiftLeft':
       case 'ShiftRight':
+      case 'KeyX':
         this.keys.gear = false;
+        break;
+      case 'KeyG':
+        this.keys.toggleTrans = false;
         break;
       case 'KeyM':
         this.keys.music = false;

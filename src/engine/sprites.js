@@ -59,6 +59,10 @@ export class SpriteManager {
       { key: 'obstacle_cone', path: 'assets/sprites/obstacle_cone.png' },
       { key: 'obstacle_barricade', path: 'assets/sprites/obstacle_barricade.png' },
       { key: 'obstacle_drum', path: 'assets/sprites/obstacle_drum.png' },
+      { key: 'obstacle_oil', path: 'assets/sprites/obstacle_oil.png' },
+      { key: 'obstacle_ramp', path: 'assets/sprites/obstacle_ramp.png' },
+      { key: 'obstacle_excavator', path: 'assets/sprites/obstacle_excavator.png' },
+      { key: 'obstacle_steel_plate', path: 'assets/sprites/obstacle_steel_plate.png' },
       { key: 'sign_roadworks', path: 'assets/sprites/sign_roadworks.png' },
 
       // Lotus 3: Snow (설원) Assets

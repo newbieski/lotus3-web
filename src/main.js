@@ -122,6 +122,16 @@ class LotusGame {
       });
     }
 
+    // Setup player event callbacks
+    this.player.gearShiftCallback = (gear) => {
+      this.audio.playGearShift();
+      this.renderer.showBanner(`GEAR: ${gear}`, 0.7, '#00ff66');
+    };
+    this.player.onLandingCallback = () => {
+      this.audio.playLandingThud();
+      this.renderer.spawnDust(this.canvas.width / 2 + (this.player.steer * 32), this.canvas.height - 25);
+    };
+
     // Touch controls for mobile / tablet
     this.setupTouchControls();
   }
@@ -203,6 +213,13 @@ class LotusGame {
       this.tuneNextRadio();
     }
 
+    // Transmission mode toggle on key 'G'
+    if (this.input.keys.toggleTrans) {
+      this.input.keys.toggleTrans = false;
+      const mode = this.player.toggleTransmission();
+      this.renderer.showBanner(`TRANSMISSION: ${mode}`, 1.2, '#33ccff');
+    }
+
     if (this.gameState === 'GAMEOVER' || this.gameState === 'FINISHED') {
       if (this.input.keys.brake || this.input.keys.up) {
         this.restart();
@@ -241,23 +258,44 @@ class LotusGame {
       }
     }
 
-    // Roadside Obstacle Collision (Cones, Barricades, Drums, Logs, Rocks)
+    // Roadside & Track Obstacle Collision (Cones, Barricades, Drums, Oil Slicks, Jump Ramps, Excavators)
     for (let spr of currentSegment.sprites) {
       const segDist = Math.abs((currentSegment.index * CONFIG.SEGMENT_LENGTH) - this.player.z);
       if (segDist < CONFIG.SEGMENT_LENGTH * 0.8) {
         const latDist = Math.abs(this.player.x - spr.offset);
-        if (latDist < 0.35) {
+        if (latDist < 0.42) {
           if (spr.key === 'obstacle_cone') {
             if (!spr.hit) {
               spr.hit = true;
               this.player.hitMinorObstacle();
               this.audio.playConeHit();
+              this.renderer.spawnDebris(this.canvas.width / 2 + (this.player.steer * 32), this.canvas.height - 70, 'cone');
               this.renderer.showBanner('🚧 CONE HIT!', 0.6, '#ff9900');
             }
+          } else if (spr.key === 'obstacle_oil') {
+            if (this.player.y < 12 && !this.player.isSpinning) {
+              this.player.triggerOilSkid();
+              this.audio.playOilSkid();
+              this.renderer.showBanner('⚠️ OIL SLICK! SPIN OUT!', 1.2, '#ff33ff');
+            }
+          } else if (spr.key === 'obstacle_ramp') {
+            if (this.player.y < 20) {
+              this.player.jump(780);
+              this.audio.playJumpWhoosh();
+              this.renderer.showBanner('🚀 JUMP RAMP!', 0.9, '#00ffcc');
+            }
+          } else if (spr.key === 'obstacle_steel_plate') {
+            if (this.player.y < 10) {
+              this.player.speed *= 0.985;
+              this.audio.playConeHit();
+            }
           } else if (spr.key === 'obstacle_barricade' || spr.key === 'obstacle_drum' || 
-                     spr.key === 'obstacle_log' || spr.key === 'obstacle_rock') {
-            this.player.triggerSpin();
-            this.renderer.showBanner('💥 CRASH!', 1.2, '#ff3333');
+                     spr.key === 'obstacle_excavator' || spr.key === 'obstacle_log' || 
+                     spr.key === 'obstacle_rock') {
+            if (this.player.y < 25) { // If car jumped high enough, fly over!
+              this.player.triggerSpin();
+              this.renderer.showBanner('💥 CRASH!', 1.2, '#ff3333');
+            }
           }
         }
       }

@@ -4,107 +4,155 @@ import { CONFIG } from '../config.js';
 export function buildRoadworksTrack(road) {
   road.reset();
 
-  // Set Roadworks specific theme colors
+  // Authentic Lotus 3 Roadworks Theme: Reddish-brown clay dirt + hazard yellow/black rumble
   road.theme = {
     sky: 'bg_roadworks_sky',
     skyline: 'bg_roadworks_skyline',
-    grassDark: '#3e342c',    // Dusty dirt/gravel
-    grassLight: '#4d4238',
-    roadDark: '#36383c',
-    roadLight: '#404248',
+    grassDark: '#50331e',    // Rich reddish-brown clay / construction earth
+    grassLight: '#634027',   // Lighter clay / dry earth
+    roadDark: '#323438',     // Patched heavy industrial asphalt
+    roadLight: '#3d4046',    // Worn asphalt
     rumbleDark: '#111111',   // Hazard black
-    rumbleLight: '#ffcc00'   // Hazard construction yellow
+    rumbleLight: '#f5b800'   // Hazard construction bright yellow
   };
 
-  // 1. Starting straight through construction perimeter
-  road.addStraight(35);
+  // -------------------------------------------------------------
+  // 1. STARTING PERIMETER: Industrial compound & Excavators
+  // -------------------------------------------------------------
+  road.addStraight(40);
   road.addSprite(5, 'gantry_start', 0); // Start Banner overhead
 
-  // Initial warning signs and construction drums along roadside
-  for (let n = 10; n < 35; n += 5) {
-    road.addSprite(n, 'obstacle_drum', -1.5);
-    road.addSprite(n, 'obstacle_drum', 1.5);
-    if (n === 20) road.addSprite(n, 'sign_roadworks', 1.6);
-  }
+  // Roadside warning signs, excavators, and construction drums
+  road.addSprite(12, 'obstacle_excavator', 1.8);
+  road.addSprite(18, 'sign_roadworks', 1.5);
+  road.addSprite(25, 'obstacle_drum', -1.5);
+  road.addSprite(30, 'obstacle_drum', 1.5);
+  road.addSprite(36, 'sign_chevron_left', 1.4);
 
-  // 2. FIRST CONSTRUCTION ZONE: Road narrows on Right! (차선 축소 구간)
-  // Warning signs before roadworks zone
-  road.addSprite(32, 'sign_roadworks', 1.3);
-  road.addSprite(34, 'sign_chevron_left', 1.3);
+  // -------------------------------------------------------------
+  // 2. TRENCH ZONE: Road Narrows with Steel Plates & Barricades
+  // -------------------------------------------------------------
+  road.addCurve(45, -1.8, 0); // Left curve
 
-  // Gentle left curve with right lane blocked by construction barricades and cones
-  road.addCurve(40, -1.8, 0);
-  for (let n = 35; n < 75; n += 2) {
-    // Row of orange traffic cones tapering inwards from right edge to center
-    const coneOffset = 1.0 - (Math.min(n - 35, 10) / 10) * 0.7; // narrows into right lane (x=0.3)
+  // Steel trench plates on the asphalt
+  road.addSprite(45, 'obstacle_steel_plate', 0.0);
+  road.addSprite(55, 'obstacle_steel_plate', -0.2);
+
+  for (let n = 42; n < 85; n += 2) {
+    // Tapering orange traffic cones closing right lane
+    const coneOffset = 1.0 - (Math.min(n - 42, 10) / 10) * 0.7;
     road.addSprite(n, 'obstacle_cone', coneOffset);
 
     if (n % 6 === 0) {
       road.addSprite(n, 'obstacle_barricade', coneOffset + 0.35);
-      road.addSprite(n, 'obstacle_drum', 1.6);
+      road.addSprite(n, 'obstacle_drum', 1.7);
     }
   }
 
-  // 3. High-speed section between excavation sites
-  road.addStraight(40);
-  for (let n = 75; n < 115; n += 5) {
-    if (n % 10 === 0) road.addSprite(n, 'obstacle_cone', (n % 20 === 0 ? -0.5 : 0.5));
-    road.addSprite(n, 'obstacle_drum', (n % 2 === 0 ? 1.5 : -1.5));
-  }
+  road.addSprite(70, 'obstacle_excavator', -1.9);
 
-  // 4. CHECKPOINT 1
-  road.addCheckpoint(130, 45); // Checkpoint 1
+  // -------------------------------------------------------------
+  // 3. JUMP RAMP & OIL SLICK COMBO! (Classic Lotus 3 Stunt Section)
+  // -------------------------------------------------------------
+  road.addStraight(45);
+  road.addSprite(88, 'sign_roadworks', 1.4);
 
-  // 5. SECOND CONSTRUCTION ZONE: S-Curves with Left Lane Closed!
-  road.addSprite(138, 'sign_roadworks', -1.3);
-  road.addSprite(142, 'sign_chevron_right', -1.3);
+  // Jump Ramp in center of lane!
+  road.addSprite(102, 'obstacle_ramp', 0.0);
 
-  // Sharp S-curves with hills
-  road.addCurve(45, 3.2, 30);  // Uphill right
-  road.addCurve(45, -3.2, -30); // Downhill left
+  // Right behind the ramp: Oil slicks across the asphalt!
+  // (Jumping over the ramp clears the oil, staying on road requires swerving!)
+  road.addSprite(110, 'obstacle_oil', -0.4);
+  road.addSprite(112, 'obstacle_oil', 0.4);
+  road.addSprite(116, 'obstacle_oil', 0.0);
 
-  // Block left lane with barricades & cones
-  for (let n = 145; n < 235; n += 3) {
-    const coneOffset = -1.0 + (Math.min(n - 145, 12) / 12) * 0.7; // narrows from -1.0 to -0.3
+  road.addSprite(120, 'obstacle_drum', -1.5);
+  road.addSprite(120, 'obstacle_drum', 1.5);
+
+  // -------------------------------------------------------------
+  // 4. CHECKPOINT 1 (+45 SECONDS)
+  // -------------------------------------------------------------
+  road.addCheckpoint(135, 45);
+
+  // -------------------------------------------------------------
+  // 5. EARTHWORKS S-CURVES: Left Lane Closed, Steep Hill, Heavy Digger
+  // -------------------------------------------------------------
+  road.addSprite(142, 'sign_roadworks', -1.4);
+  road.addSprite(145, 'sign_chevron_right', -1.4);
+
+  road.addCurve(45, 3.2, 35);  // Uphill right
+  road.addCurve(45, -3.2, -35); // Downhill left
+
+  road.addSprite(160, 'obstacle_excavator', 1.8);
+
+  // Left lane blocked with cones and barricades
+  for (let n = 148; n < 225; n += 3) {
+    const coneOffset = -1.0 + (Math.min(n - 148, 12) / 12) * 0.7;
     road.addSprite(n, 'obstacle_cone', coneOffset);
     if (n % 6 === 0) {
       road.addSprite(n, 'obstacle_barricade', coneOffset - 0.35);
     }
-    road.addSprite(n, 'obstacle_drum', 1.5 + (Math.random() * 0.3));
+    if (n % 12 === 0) {
+      road.addSprite(n, 'obstacle_drum', 1.6);
+    }
   }
 
-  // 6. High Elevation Overpass Bridge
-  road.addHill(35, 50);
-  road.addStraight(30);
-  road.addHill(35, -50);
+  // Second Jump Ramp placed on hill crest
+  road.addSprite(190, 'obstacle_ramp', 0.2);
+  road.addSprite(196, 'obstacle_oil', 0.2);
+  road.addSprite(205, 'obstacle_steel_plate', -0.1);
 
-  for (let n = 235; n < 335; n += 6) {
-    if (n === 270) road.addSprite(n, 'obstacle_cone', 0.0); // Center pylon
-    if (n === 300) road.addSprite(n, 'obstacle_cone', -0.4);
-    road.addSprite(n, 'obstacle_drum', -1.5);
-    road.addSprite(n, 'obstacle_drum', 1.5);
-  }
-
-  // 7. CHECKPOINT 2
-  road.addCheckpoint(360, 40); // Checkpoint 2
-
-  // 8. FINAL SPRINT: Slalom through slalom cones towards Finish Line!
-  road.addCurve(40, -2.2, 10);
-  road.addCurve(40, 2.2, -10);
+  // -------------------------------------------------------------
+  // 6. HIGH-SPEED OVERPASS & OIL EVASION GAUNTLET
+  // -------------------------------------------------------------
+  road.addHill(30, 45);
   road.addStraight(40);
+  road.addHill(30, -45);
 
-  for (let n = 370; n < 480; n += 5) {
-    // Alternating cones for thrilling slalom racing
-    if (n % 10 === 0) {
-      road.addSprite(n, 'obstacle_cone', (n % 20 === 0 ? 0.35 : -0.35));
+  road.addSprite(235, 'sign_roadworks', 1.5);
+  road.addSprite(250, 'obstacle_steel_plate', 0.0);
+  road.addSprite(265, 'obstacle_oil', -0.5);
+  road.addSprite(280, 'obstacle_oil', 0.4);
+  road.addSprite(295, 'obstacle_ramp', -0.3); // Off-center jump ramp
+  road.addSprite(303, 'obstacle_oil', -0.3);
+  road.addSprite(315, 'obstacle_drum', -1.5);
+  road.addSprite(315, 'obstacle_drum', 1.5);
+  road.addSprite(330, 'obstacle_excavator', -1.9);
+
+  // -------------------------------------------------------------
+  // 7. CHECKPOINT 2 (+40 SECONDS)
+  // -------------------------------------------------------------
+  road.addCheckpoint(355, 40);
+
+  // -------------------------------------------------------------
+  // 8. FINAL SPRINT: Slalom Obstacle Gauntlet to the Finish Line
+  // -------------------------------------------------------------
+  road.addCurve(45, -2.5, 15);
+  road.addCurve(45, 2.5, -15);
+  road.addStraight(55);
+
+  road.addSprite(365, 'sign_roadworks', 1.4);
+
+  // Alternating cones, oil patches, and final jump ramp before finish
+  for (let n = 375; n < 485; n += 6) {
+    if (n === 410) {
+      road.addSprite(n, 'obstacle_ramp', 0.0); // Center ramp
+    } else if (n === 418) {
+      road.addSprite(n, 'obstacle_oil', -0.35);
+      road.addSprite(n, 'obstacle_oil', 0.35);
+    } else if (n % 12 === 0) {
+      road.addSprite(n, 'obstacle_cone', (n % 24 === 0 ? 0.35 : -0.35));
+      road.addSprite(n, 'obstacle_steel_plate', 0.0);
     }
     road.addSprite(n, 'obstacle_drum', (n % 2 === 0 ? 1.6 : -1.6));
   }
+
+  road.addSprite(470, 'obstacle_excavator', 1.8);
 
   // Finish Line Gantry
   road.addCheckpoint(500, 0); // FINISH LINE
   road.addSprite(500, 'gantry_start', 0);
 
   road.finishBuilding();
-  console.log(`Roadworks track built: ${road.segments.length} segments (${road.trackLength} units)`);
+  console.log(`Authentic Lotus 3 Roadworks track built: ${road.segments.length} segments`);
 }

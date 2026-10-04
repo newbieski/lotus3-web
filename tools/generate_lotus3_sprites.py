@@ -210,6 +210,93 @@ def generate_roadworks_assets():
     d_drm.line([(18, 98), (72, 98)], fill="#771100", width=2)
     im_drm.save(os.path.join(SPRITES_DIR, "obstacle_drum.png"))
 
+    # E. Oil Slick (검은색 유출 오일 웅덩이 - 스핀 유발)
+    w_oil, h_oil = 180, 65
+    im_oil = Image.new("RGBA", (w_oil, h_oil), (0, 0, 0, 0))
+    d_oil = ImageDraw.Draw(im_oil)
+    # Dark viscous puddle
+    d_oil.ellipse([10, 8, 170, 58], fill=(15, 15, 18, 230))
+    d_oil.ellipse([18, 14, 162, 52], fill=(22, 20, 28, 250))
+    # Iridescent sheen (무지개빛 오일 광택)
+    d_oil.ellipse([30, 20, 140, 44], fill=(35, 30, 48, 210))
+    d_oil.ellipse([50, 24, 110, 38], fill=(45, 55, 75, 190))
+    # Specular liquid reflections
+    d_oil.line([(40, 28), (85, 26)], fill="#7588a3", width=2)
+    d_oil.line([(100, 34), (145, 32)], fill="#5c697e", width=2)
+    im_oil.save(os.path.join(SPRITES_DIR, "obstacle_oil.png"))
+
+    # F. Jump Ramp (공사장 경사 점프대 - 공중 도약 기믹)
+    w_ramp, h_ramp = 200, 70
+    im_ramp = Image.new("RGBA", (w_ramp, h_ramp), (0, 0, 0, 0))
+    d_ramp = ImageDraw.Draw(im_ramp)
+    # Under ramp shadow
+    d_ramp.ellipse([15, 48, 185, 68], fill=(0, 0, 0, 140))
+    # Wooden/steel wedge incline
+    ramp_pts = [(20, 56), (180, 56), (170, 14), (30, 14)]
+    d_ramp.polygon(ramp_pts, fill="#825c34", outline="#4a3016", width=2)
+    # Ramp surface planks
+    for px in range(35, 170, 18):
+        d_ramp.line([(px, 15), (px - 5, 55)], fill="#664624", width=2)
+    # Steel approach lip
+    d_ramp.polygon([(20, 56), (180, 56), (175, 50), (25, 50)], fill="#555555")
+    # Takeoff edge yellow/black hazard board
+    d_ramp.rectangle([28, 12, 172, 24], fill="#ffcc00", outline="#111111", width=2)
+    for hx in range(32, 165, 16):
+        d_ramp.polygon([(hx, 23), (hx + 8, 23), (hx + 14, 13), (hx + 6, 13)], fill="#111111")
+    im_ramp.save(os.path.join(SPRITES_DIR, "obstacle_ramp.png"))
+
+    # G. Construction Excavator / Digger (대형 굴착기 - 노변 중장비)
+    w_exc, h_exc = 240, 170
+    im_exc = Image.new("RGBA", (w_exc, h_exc), (0, 0, 0, 0))
+    d_exc = ImageDraw.Draw(im_exc)
+    # Shadow
+    d_exc.ellipse([15, 142, 225, 168], fill=(0, 0, 0, 130))
+    # Caterpillar continuous tracks (무한궤도 트랙)
+    d_exc.rounded_rectangle([30, 118, 170, 154], radius=14, fill="#252528", outline="#111111", width=3)
+    # Sprocket wheels inside track
+    for wx in [48, 76, 100, 124, 152]:
+        d_exc.ellipse([wx - 10, 124, wx + 10, 148], fill="#444448", outline="#111111", width=2)
+    # Revolving superstructure body (Caterpillar Yellow)
+    cat_yellow = "#e6a800"
+    cat_hi = "#ffc820"
+    cat_dark = "#996e00"
+    d_exc.rectangle([40, 72, 155, 120], fill=cat_yellow, outline="#111111", width=3)
+    d_exc.line([(42, 74), (153, 74)], fill=cat_hi, width=3)
+    d_exc.rectangle([135, 78, 155, 115], fill="#333333") # Counterweight
+    # Operator Glass Cabin
+    d_exc.rectangle([48, 42, 92, 85], fill="#1c2836", outline="#111111", width=3)
+    d_exc.rectangle([54, 48, 86, 76], fill="#6eb5e6") # Glass
+    d_exc.line([(56, 50), (75, 74)], fill="#ffffff", width=2) # Glass reflection
+    # Engine exhaust pipe
+    d_exc.rectangle([140, 52, 146, 72], fill="#444444", outline="#111111")
+    # Hydraulic Boom Arm & Bucket
+    d_exc.line([(85, 82), (130, 20)], fill=cat_yellow, width=12) # Main boom
+    d_exc.line([(85, 82), (130, 20)], fill="#111111", width=2)
+    d_exc.line([(130, 20), (195, 65)], fill=cat_yellow, width=9) # Stick arm
+    # Excavator Bucket
+    b_pts = [(195, 65), (218, 72), (212, 98), (185, 92)]
+    d_exc.polygon(b_pts, fill="#38383c", outline="#111111", width=2)
+    # Bucket teeth
+    d_exc.polygon([(218, 72), (226, 78), (216, 82)], fill="#c0c0c0")
+    im_exc.save(os.path.join(SPRITES_DIR, "obstacle_excavator.png"))
+
+    # H. Steel Road Trench Plate (공사용 도로 복공판 / 철판)
+    w_stp, h_stp = 160, 50
+    im_stp = Image.new("RGBA", (w_stp, h_stp), (0, 0, 0, 0))
+    d_stp = ImageDraw.Draw(im_stp)
+    # Dark recessed trench shadow
+    d_stp.rectangle([12, 10, 148, 44], fill="#1a1c20")
+    # Steel textured plate
+    d_stp.polygon([(16, 38), (144, 38), (140, 14), (20, 14)], fill="#7a828e", outline="#40454d", width=2)
+    # Diamond tread cross lines
+    for lx in range(25, 135, 15):
+        d_stp.line([(lx, 16), (lx + 8, 36)], fill="#9aa2af", width=1)
+        d_stp.line([(lx + 8, 16), (lx, 36)], fill="#5c626c", width=1)
+    # Lifting bolt holes
+    d_stp.ellipse([30, 22, 38, 30], fill="#22252a")
+    d_stp.ellipse([122, 22, 130, 30], fill="#22252a")
+    im_stp.save(os.path.join(SPRITES_DIR, "obstacle_steel_plate.png"))
+
     print("Roadworks obstacle sprites generated!")
 
 # -------------------------------------------------------------

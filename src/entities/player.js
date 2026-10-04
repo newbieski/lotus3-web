@@ -20,7 +20,9 @@ export class Player {
 
   reset() {
     this.x = 0;          // -1 (left shoulder) to +1 (right shoulder)
-    this.y = 0;          // Height above ground
+    this.y = 0;          // Height above ground (Jump offset)
+    this.vy = 0;         // Vertical velocity
+    this.isJumping = false;
     this.z = 0;          // Distance along track
     this.speed = 0;      // Current speed (0 - CONFIG.MAX_SPEED)
     this.steer = 0;      // Current steering angle
@@ -33,6 +35,41 @@ export class Player {
     this.isGameOver = false;
     this.isFinished = false;
     this.currentCheckpointIndex = -1;
+
+    // Transmission & Gear system (Lotus authentic Low/High)
+    this.transmissionMode = 'AUTO'; // 'AUTO' or 'MANUAL'
+    this.gear = 'LOW';              // 'LOW' or 'HIGH'
+    this.gearShiftCallback = null;
+    this.onLandingCallback = null;
+    this.prevGearKeyPressed = false;
+  }
+
+  toggleTransmission() {
+    this.transmissionMode = (this.transmissionMode === 'AUTO') ? 'MANUAL' : 'AUTO';
+    return this.transmissionMode;
+  }
+
+  shiftGear(newGear) {
+    if (this.gear !== newGear) {
+      this.gear = newGear;
+      if (this.gearShiftCallback) this.gearShiftCallback(this.gear);
+    }
+  }
+
+  jump(power = 750) {
+    if (!this.isJumping) {
+      this.isJumping = true;
+      this.vy = power;
+    }
+  }
+
+  triggerOilSkid() {
+    if (!this.isSpinning) {
+      this.isSpinning = true;
+      this.spinTimer = 1.1;
+      this.steer = (Math.random() > 0.5 ? 2.6 : -2.6);
+      this.speed *= 0.65;
+    }
   }
 
   update(dt, input, currentSegment) {
@@ -44,6 +81,25 @@ export class Player {
       this.timeRemaining = 0;
       this.isGameOver = true;
     }
+
+    // 1. Jump Physics
+    if (this.isJumping) {
+      this.y += this.vy * dt;
+      this.vy -= 1600 * dt; // Gravity
+      if (this.y <= 0) {
+        this.y = 0;
+        this.vy = 0;
+        this.isJumping = false;
+        if (this.onLandingCallback) this.onLandingCallback();
+      }
+    }
+
+    // 2. Manual Gear shift input
+    if (input.keys.gear && !this.prevGearKeyPressed) {
+      this.shiftGear(this.gear === 'LOW' ? 'HIGH' : 'LOW');
+      this.transmissionMode = 'MANUAL';
+    }
+    this.prevGearKeyPressed = !!input.keys.gear;
 
     // Spin recovery
     if (this.isSpinning) {
@@ -59,12 +115,40 @@ export class Player {
     // Off-road check
     this.isOffroad = (this.x < -1.0 || this.x > 1.0);
 
-    // Acceleration & Braking
+    // Automatic transmission logic
+    const currentSpeedRatio = this.speed / CONFIG.MAX_SPEED;
+    if (this.transmissionMode === 'AUTO') {
+      if (this.gear === 'LOW' && currentSpeedRatio > 0.44) {
+        this.shiftGear('HIGH');
+      } else if (this.gear === 'HIGH' && currentSpeedRatio < 0.36) {
+        this.shiftGear('LOW');
+      }
+    }
+
+    // Acceleration & Braking with Gear ratio dynamics
+    const spec = this.carSpecs[this.selectedCar] || this.carSpecs.m200;
     this.isBraking = input.keys.down || input.keys.brake;
 
     if (input.keys.up) {
-      if (this.speed < CONFIG.MAX_SPEED) {
-        this.speed += CONFIG.ACCEL * dt;
+      let gearAccel = 1.0;
+      let gearMaxSpeed = CONFIG.MAX_SPEED * (spec.topSpeedMph / 152);
+
+      if (this.gear === 'LOW') {
+        gearAccel = 1.45 * spec.accelMult;
+        gearMaxSpeed = CONFIG.MAX_SPEED * 0.48; // Max ~125 km/h in Low
+        if (this.speed >= gearMaxSpeed) {
+          // Rev limiter bounce
+          this.speed = gearMaxSpeed + (Math.random() * 20 - 10);
+        } else {
+          this.speed += CONFIG.ACCEL * gearAccel * dt;
+        }
+      } else {
+        // High gear: sluggish at standstill, powerful at mid-high speed
+        const lowEndPenalty = currentSpeedRatio < 0.35 ? 0.65 : 1.05;
+        gearAccel = lowEndPenalty * spec.accelMult;
+        if (this.speed < gearMaxSpeed) {
+          this.speed += CONFIG.ACCEL * gearAccel * dt;
+        }
       }
     } else if (this.isBraking) {
       this.speed += CONFIG.BREAKING * dt;
@@ -76,14 +160,13 @@ export class Player {
     // Off-road penalty
     if (this.isOffroad) {
       this.speed += CONFIG.DECEL_OFFROAD * dt;
-      // Cap offroad top speed
       if (this.speed > CONFIG.MAX_SPEED * 0.35) {
         this.speed = Math.max(CONFIG.MAX_SPEED * 0.35, this.speed + CONFIG.DECEL_OFFROAD * dt);
       }
     }
 
     // Clamp speed
-    this.speed = Math.max(0, Math.min(this.speed, CONFIG.MAX_SPEED));
+    this.speed = Math.max(0, Math.min(this.speed, CONFIG.MAX_SPEED * 1.1));
 
     // Steering
     const speedRatio = this.speed / CONFIG.MAX_SPEED;
@@ -137,7 +220,13 @@ export class Player {
 
   getRPM() {
     const ratio = this.speed / CONFIG.MAX_SPEED;
-    return Math.round(1200 + ratio * 6800); // 1200 - 8000 RPM
+    if (this.gear === 'LOW') {
+      const lowRatio = Math.min(1.0, ratio / 0.45);
+      return Math.round(1200 + lowRatio * 6600);
+    } else {
+      const highRatio = Math.max(0, (ratio - 0.35) / 0.65);
+      return Math.round(3400 + Math.min(1.0, highRatio) * 4400);
+    }
   }
 
   // Get active sprite key based on steering angle, slope, braking, and selectedCar

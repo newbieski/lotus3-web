@@ -17,12 +17,50 @@ export class Renderer {
     this.bannerText = '';
     this.bannerTimer = 0;
     this.bannerColor = '#ffff00';
+
+    // Particle debris system (traffic cones, dirt puffs)
+    this.particles = [];
   }
 
   showBanner(text, duration = 2.5, color = '#ffff00') {
     this.bannerText = text;
     this.bannerTimer = duration;
     this.bannerColor = color;
+  }
+
+  spawnDebris(screenX, screenY, type = 'cone') {
+    const count = type === 'cone' ? 4 : 6;
+    for (let i = 0; i < count; i++) {
+      this.particles.push({
+        x: screenX,
+        y: screenY,
+        vx: (Math.random() - 0.5) * 450,
+        vy: -220 - Math.random() * 320,
+        rot: Math.random() * Math.PI,
+        vrot: (Math.random() - 0.5) * 14,
+        life: 0.85,
+        maxLife: 0.85,
+        type: type,
+        size: 14 + Math.random() * 8
+      });
+    }
+  }
+
+  spawnDust(screenX, screenY) {
+    for (let i = 0; i < 10; i++) {
+      this.particles.push({
+        x: screenX + (Math.random() - 0.5) * 60,
+        y: screenY,
+        vx: (Math.random() - 0.5) * 180,
+        vy: -20 - Math.random() * 50,
+        rot: 0,
+        vrot: 0,
+        life: 0.5,
+        maxLife: 0.5,
+        type: 'dust',
+        size: 8 + Math.random() * 12
+      });
+    }
   }
 
   render(road, player, camera, spriteManager, rivalManager, dt, audio) {
@@ -43,11 +81,11 @@ export class Renderer {
     const playerSegment = road.findSegment(player.z + (CONFIG.CAMERA_HEIGHT * camera.depth));
     const playerPercent = ((player.z + (CONFIG.CAMERA_HEIGHT * camera.depth)) % CONFIG.SEGMENT_LENGTH) / CONFIG.SEGMENT_LENGTH;
     
-    // Smooth camera elevation
-    player.y = playerSegment.p1.world.y + (playerSegment.p2.world.y - playerSegment.p1.world.y) * playerPercent;
+    // Smooth camera elevation from terrain
+    player.worldY = playerSegment.p1.world.y + (playerSegment.p2.world.y - playerSegment.p1.world.y) * playerPercent;
     
     let cameraX = player.x * CONFIG.ROAD_WIDTH;
-    let cameraY = CONFIG.CAMERA_HEIGHT + player.y;
+    let cameraY = CONFIG.CAMERA_HEIGHT + player.worldY + (player.y * 0.4);
     let cameraZ = player.z - (CONFIG.CAMERA_HEIGHT * camera.depth * 0.25);
 
     let dx = -(baseSegment.curve * basePercent);
@@ -128,13 +166,16 @@ export class Renderer {
       }
     }
 
-    // 4. Render Player Lotus Elan SE
+    // 4. Render Player Vehicle with dynamic body roll & jump physics
     this.renderPlayer(ctx, player, baseSegment, spriteManager, width, height);
 
-    // 5. Render Lotus 3 Arcade HUD & Dashboard
+    // 5. Render Particle Debris (Cones flying, dust puffs)
+    this.renderParticles(ctx, dt);
+
+    // 6. Render Lotus 3 Arcade HUD & Dashboard
     this.renderHUD(ctx, player, road, width, height);
 
-    // 6. Notification Banners
+    // 7. Notification Banners
     if (this.bannerTimer > 0) {
       this.renderBanner(ctx, width, height);
     }
@@ -305,9 +346,9 @@ export class Renderer {
 
     const speedRatio = player.speed / CONFIG.MAX_SPEED;
 
-    // Engine/road bounce
+    // Engine/road bounce (only active when on ground)
     let bounce = 0;
-    if (player.speed > 0) {
+    if (player.speed > 0 && player.y <= 2) {
       const freq = player.isOffroad ? 28 : 14;
       const amp = player.isOffroad ? 4 : 1.5;
       bounce = Math.sin(performance.now() * 0.001 * freq) * amp;
@@ -322,19 +363,38 @@ export class Renderer {
     const steerShift = player.steer * 32;
     // 2. Chassis body roll (banking angle into turn + centrifugal curve lean)
     const curveInfluence = currentSegment ? (currentSegment.curve || 0) * 0.02 * speedRatio : 0;
-    const rollAngle = (player.steer * 0.042) + curveInfluence;
+    let rollAngle = (player.steer * 0.042) + curveInfluence;
+
+    // 360 degree spin rotation if spinning (Oil slick or crash)
+    if (player.isSpinning) {
+      rollAngle = (player.spinTimer * 26);
+    }
+
     // 3. Dynamic suspension squat under acceleration, dive under braking
     const suspensionPitch = player.isBraking ? -3 : (player.speed > 500 ? 2 : 0);
 
+    const groundCenterY = height - (carH / 2) - 18 + bounce;
+    const jumpOffset = (player.y || 0) * 0.35;
     const centerX = (width / 2) + steerShift;
-    const centerY = height - (carH / 2) - 18 + bounce + suspensionPitch;
+    const centerY = groundCenterY + suspensionPitch - jumpOffset;
+
+    // Ground Shadow when airborne
+    if (player.y > 4) {
+      ctx.save();
+      const shadowRatio = Math.max(0.3, 1.0 - (player.y / 900));
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(centerX, groundCenterY + carH * 0.38, (carW * 0.45) * shadowRatio, 8 * shadowRatio, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
 
     ctx.save();
     ctx.translate(centerX, centerY);
     ctx.rotate(rollAngle);
 
-    // Exhaust smoke puffs when accelerating at speed
-    if (player.speed > 1000 && !player.isBraking && Math.random() < 0.4) {
+    // Exhaust smoke puffs when accelerating at speed on ground
+    if (player.speed > 1000 && !player.isBraking && player.y <= 2 && Math.random() < 0.4) {
       ctx.fillStyle = 'rgba(230, 230, 230, 0.45)';
       ctx.beginPath();
       ctx.arc(-carW * 0.05, carH * 0.45, 3 + Math.random() * 4, 0, Math.PI * 2);
@@ -344,6 +404,45 @@ export class Renderer {
 
     ctx.drawImage(carImg, -carW / 2, -carH / 2, carW, carH);
     ctx.restore();
+  }
+
+  renderParticles(ctx, dt) {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.life -= dt;
+      if (p.life <= 0) {
+        this.particles.splice(i, 1);
+        continue;
+      }
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 650 * dt; // Gravity
+      p.rot += p.vrot * dt;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = Math.min(1.0, p.life * 2.2);
+
+      if (p.type === 'cone') {
+        // Tumbling orange traffic cone
+        ctx.fillStyle = '#ff5500';
+        ctx.beginPath();
+        ctx.moveTo(0, -p.size);
+        ctx.lineTo(-p.size * 0.55, p.size * 0.55);
+        ctx.lineTo(p.size * 0.55, p.size * 0.55);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-p.size * 0.28, -p.size * 0.15, p.size * 0.56, p.size * 0.25);
+      } else if (p.type === 'dust') {
+        ctx.fillStyle = '#7a5a3a';
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
   }
 
   renderHUD(ctx, player, road, width, height) {
@@ -368,7 +467,7 @@ export class Renderer {
     const rpmBoxX = 18;
     const rpmBoxY = 36;
     const rpmBoxW = 110;
-    const rpmBoxH = 22;
+    const rpmBoxH = 20;
     // Outer black border
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 3;
@@ -384,13 +483,22 @@ export class Renderer {
     ctx.lineWidth = 2;
     ctx.strokeRect(rpmBoxX, rpmBoxY, rpmBoxW, rpmBoxH);
 
+    // Transmission & Gear indicator
+    const gearColor = (player.gear === 'HIGH') ? '#00ff66' : '#ffcc00';
+    ctx.font = '900 13px "Impact", "Arial Black", monospace';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
+    ctx.strokeText(`GEAR: ${player.gear} [${player.transmissionMode}]`, 18, 72);
+    ctx.fillStyle = gearColor;
+    ctx.fillText(`GEAR: ${player.gear} [${player.transmissionMode}]`, 18, 72);
+
     // Rank / Position (1ST, 2ND, etc.)
     ctx.font = '900 32px "Impact", "Arial Black", monospace';
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 6;
-    ctx.strokeText('1ST', 18, 92);
+    ctx.strokeText('1ST', 18, 108);
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('1ST', 18, 92);
+    ctx.fillText('1ST', 18, 108);
 
     // 2. TOP-RIGHT: Score & Checkpoint Timer
     // Score Counter (8 digits)
