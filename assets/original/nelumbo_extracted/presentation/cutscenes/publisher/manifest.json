@@ -1,0 +1,18 @@
+{
+  "format": "nelumbo-publisher-splash-v1",
+  "provenance": "../frog/assets/authored/presentation/cutscenes/publisher",
+  "atlases": [
+    "atlas-0.png",
+    "atlas-1.png"
+  ],
+  "frame_width": 320,
+  "frame_height": 200,
+  "columns": 10,
+  "frames_per_atlas": 130,
+  "frame_count": 259,
+  "tick_hz": 50,
+  "frame_rate": 60,
+  "animation_ticks": 215,
+  "hold_ticks": 45,
+  "fade_out_ticks": 50
+}

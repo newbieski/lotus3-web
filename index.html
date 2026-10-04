@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lotus Turbo Challenge 2 - Web Arcade</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="arcadeWrapper">
+    <!-- Retro Arcade Marquee -->
+    <header class="arcade-header">
+      <div class="header-logo">
+        <span class="brand-lotus">LOTUS</span>
+        <span class="brand-sub">TURBO CHALLENGE 2</span>
+      </div>
+      <div class="header-tools">
+        <button id="muteBtn" class="arcade-btn">🔊 SOUND</button>
+        <button id="scanlineBtn" class="arcade-btn">📺 CRT: ON</button>
+      </div>
+    </header>
+
+    <!-- Canvas Frame Container -->
+    <div class="screen-container">
+      <canvas id="gameCanvas" width="640" height="400"></canvas>
+      <div id="crtOverlay" class="crt-scanlines"></div>
+
+      <!-- Splash / Click-to-Play Overlay -->
+      <div id="splashScreen" class="overlay-screen">
+        <div class="splash-card">
+          <h1 class="glow-title">LOTUS 2</h1>
+          <h2 class="sub-title">WEB RE-CREATION ENGINE</h2>
+          <div class="lotus-badge">🏁 BRITISH RACING GREEN • ELAN SE 🏁</div>
+          <div class="pulse-start">▶ CLICK OR PRESS SPACE TO START ◀</div>
+          <div class="key-guide">
+            <span>[⬆ / W] 가속</span>
+            <span>[⬇ / S / Space] 브레이크</span>
+            <span>[⬅ ➡ / A D] 핸들링</span>
+            <span>[M] 음소거</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Touch Controls -->
+    <div id="touchControls" class="touch-bar">
+      <div class="touch-group steer-group">
+        <button id="btnLeft" class="touch-btn">◀</button>
+        <button id="btnRight" class="touch-btn">▶</button>
+      </div>
+      <div class="touch-group pedal-group">
+        <button id="btnBrake" class="touch-btn brake-btn">BRAKE</button>
+        <button id="btnGas" class="touch-btn gas-btn">GAS</button>
+      </div>
+    </div>
+
+    <!-- Footer Specs -->
+    <footer class="arcade-footer">
+      <span>Original 1991 Magnetic Fields & Gremlin Graphics</span>
+      <span>Music by Barry Leitch</span>
+      <span>HTML5 Canvas Pseudo-3D Engine</span>
+    </footer>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+  <script>
+    // CRT scanline toggle
+    const scanlineBtn = document.getElementById('scanlineBtn');
+    const crtOverlay = document.getElementById('crtOverlay');
+    let crtEnabled = true;
+    if (scanlineBtn && crtOverlay) {
+      scanlineBtn.addEventListener('click', () => {
+        crtEnabled = !crtEnabled;
+        crtOverlay.style.display = crtEnabled ? 'block' : 'none';
+        scanlineBtn.textContent = crtEnabled ? '📺 CRT: ON' : '📺 CRT: OFF';
+      });
+    }
+  </script>
+</body>
+</html>

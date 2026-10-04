@@ -1,0 +1,13 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary and build
+node_modules/
+dist/
+*.log
+
+# Large raw archives if needed
+*.xz
+*.tar
+assets/original/Nelumbo.pak

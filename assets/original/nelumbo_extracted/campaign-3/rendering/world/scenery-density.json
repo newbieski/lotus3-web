@@ -1,0 +1,5 @@
+{
+  "format": "nelumbo-scenery-density-v1",
+  "multiplier": 20,
+  "sets": [22, 38, 47, 54, 55, 74, 81, 104]
+}

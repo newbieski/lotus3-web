@@ -1,0 +1,73 @@
+{
+  "format": "nelumbo-campaign-1-scenery-source-overrides-v1",
+  "overrides": [
+    {
+      "target": {
+        "set": 7,
+        "manifest_fingerprint_fnv1a64": "4f2b206aa06a1212",
+        "atlas_fingerprint_fnv1a64": "4b8c515eea16ab5d",
+        "mask_fingerprint_fnv1a64": "7ad2df7d681b436f"
+      },
+      "source": {
+        "campaign": 2,
+        "set": 18,
+        "manifest_fingerprint_fnv1a64": "1230b9372e321acf",
+        "atlas_fingerprint_fnv1a64": "e71adf3c60163077",
+        "mask_fingerprint_fnv1a64": "c6096e6ab80349c8"
+      },
+      "palette_index_map": [
+        {"from": 0, "to": 0},
+        {"from": 2, "to": 4},
+        {"from": 6, "to": 7},
+        {"from": 9, "to": 11},
+        {"from": 10, "to": 10},
+        {"from": 13, "to": 9}
+      ]
+    },
+    {
+      "target": {
+        "set": 16,
+        "manifest_fingerprint_fnv1a64": "aa736d818b9cc9fc",
+        "atlas_fingerprint_fnv1a64": "b8775ca795f4dcec",
+        "mask_fingerprint_fnv1a64": "0158c93364e6d5e0"
+      },
+      "source": {
+        "campaign": 2,
+        "set": 66,
+        "manifest_fingerprint_fnv1a64": "0564032906d7d8d8",
+        "atlas_fingerprint_fnv1a64": "f84f728fb6431075",
+        "mask_fingerprint_fnv1a64": "9573ab8569de2856"
+      },
+      "palette_index_map": [
+        {"from": 0, "to": 0},
+        {"from": 2, "to": 4},
+        {"from": 9, "to": 10},
+        {"from": 10, "to": 11},
+        {"from": 13, "to": 8}
+      ]
+    },
+    {
+      "target": {
+        "set": 20,
+        "manifest_fingerprint_fnv1a64": "43ca914172bce62f",
+        "atlas_fingerprint_fnv1a64": "53c26b4b0b930f9e",
+        "mask_fingerprint_fnv1a64": "4da23ac4703cf896"
+      },
+      "source": {
+        "campaign": 2,
+        "set": 51,
+        "manifest_fingerprint_fnv1a64": "21eecad693b8ddc2",
+        "atlas_fingerprint_fnv1a64": "acbf3de15c0591de",
+        "mask_fingerprint_fnv1a64": "5894e6f4afa14414"
+      },
+      "palette_index_map": [
+        {"from": 0, "to": 0},
+        {"from": 1, "to": 5},
+        {"from": 2, "to": 4},
+        {"from": 6, "to": 7},
+        {"from": 9, "to": 10},
+        {"from": 13, "to": 11}
+      ]
+    }
+  ]
+}
