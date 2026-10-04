@@ -336,3 +336,48 @@ renderPlayer(ctx, player, currentSegment, spriteManager, width, height) {
 * 피니시 라인 통과 시 승리의 팡파르(`playVictoryFanfare`) 재생.
 * 클리어 타임, `localStorage` 기반 개인 최고 기록(신기록 뱃지), 최고 속도(KM/H & MPH), 통과 체크포인트(+초)를 한눈에 볼 수 있는 아케이드 결과창(`resultsScreen`) 팝업.
 * `[NEXT STAGE]` 버튼 또는 Space/Enter 입력 시 6개 맵(공사장 ➡️ 숲 ➡️ 설원 ➡️ 사막 ➡️ 야간 ➡️ 폭풍우)을 순서대로 순환하는 챔피언십 레이스 루프 완성.
+
+---
+
+## 8. GitHub Pages 정적 웹 호스팅 아키텍처 및 배포 메커니즘 (Static Hosting Architecture)
+
+### 8.1 깃허브 저장소 구조와 웹 URL 1:1 매핑 원리
+GitHub Pages는 Git 저장소의 브랜치(Branch) 디렉토리 구조를 전 세계 CDN(Fastly) 망의 웹 서버 루트 디렉토리로 직접 매핑하여 서비스하는 정적 호스팅(Static Web Hosting)입니다.
+
+```
+[GitHub 원격 저장소 (main 브랜치 루트)]          [GitHub Pages 공개 웹 주소]
+-------------------------------------------------------------------------------------------------
+/lotus3-web                                   
+ ├── index.html                   ======>   https://newbieski.github.io/lotus3-web/
+ ├── style.css                    ======>   https://newbieski.github.io/lotus3-web/style.css
+ ├── src/                                  
+ │    ├── main.js                 ======>   https://newbieski.github.io/lotus3-web/src/main.js
+ │    ├── config.js               ======>   https://newbieski.github.io/lotus3-web/src/config.js
+ │    └── engine/road.js 등       ======>   https://newbieski.github.io/lotus3-web/src/engine/road.js
+ └── assets/                               
+      ├── sprites/*.png           ======>   https://newbieski.github.io/lotus3-web/assets/sprites/*.png
+      └── audio/*.mp3             ======>   https://newbieski.github.io/lotus3-web/assets/audio/*.mp3
+```
+
+1. **대문 페이지 규격**: 웹 표준 규약에 따라 루트 디렉토리의 `index.html`이 홈페이지 대문 역할을 수행합니다.
+2. **트리 구조 직접 서빙**: 모든 디렉토리 구조가 변경 없이 그대로 URL 엔드포인트로 노출되므로 복잡한 라우팅 서버 설정이 불필요합니다.
+
+### 8.2 클라이언트 사이드 연산 모델 (Client-Side Execution)
+* **서버의 역할 (파일 전송)**:
+  * GitHub Pages 웹 서버는 브라우저의 HTTP 요청 시 정적 리소스(HTML, CSS, JS, PNG, MP3)를 그대로 사용자 기기로 전송(Serve)하고 연결을 종료합니다.
+  * 백엔드 API, 애플리케이션 서버(Node.js, Express, Python, DB), 동적 렌더링 서버가 전혀 개입하지 않습니다.
+* **클라이언트의 역할 (게임 엔진 구동)**:
+  * 리소스를 전달받은 사용자의 웹 브라우저(크롬, 사파리, 엣지 등) 내장 V8/자바스크립트 엔진이 `main.js` 모듈을 파싱하여 즉시 실행합니다.
+  * 매 프레임 60 FPS 의사 3D 도로 래스터 투영(Canvas 2D), 차체 뱅킹/충돌 물리, Web Audio API 트윈캠 오실레이터 사운드 합성은 **전적으로 사용자의 로컬 컴퓨터/스마트폰 CPU & GPU**가 수행합니다.
+  * 개인 최고 기록(Personal Best) 또한 브라우저 내장 `localStorage`를 사용하므로 데이터베이스(DB) 없이도 영구 보존됩니다.
+
+### 8.3 Zero-Dependency & No-Build 설계
+* **빌드리스(Build-less) 네이티브 ES 모듈**:
+  * Webpack, Vite, Babel 등 트랜스파일러나 번들러 없이 브라우저 네이티브 `import / export` 문법으로만 구성되어 있습니다.
+  * 빌드 파이프라인(CI/CD, npm build) 결함이나 의존성 라이브러리 충돌 위험이 전혀 없으며, 저장소에 푸시된 원본 코드가 그 자체로 완제품입니다.
+
+### 8.4 서브디렉토리 격리 호환 (Relative Path Strategy)
+* GitHub Pages는 계정 단위 루트(`https://username.github.io/`)가 아닌 프로젝트 저장소 서브 경로(`https://username.github.io/lotus3-web/`)로 배포됩니다.
+* 만약 절대 경로(`/assets/...`, `/src/...`)를 사용할 경우 루트 도메인(`username.github.io/assets/...`)을 참조하여 404 에러가 발생합니다.
+* 본 프로젝트는 모든 에셋 및 모듈 호출을 **철저한 상대 경로(`assets/sprites/...`, `./core/loop.js`)**로 설계하여, 서브디렉토리 주소 체계에서도 단 하나의 404 에러 없이 100% 매끄럽게 로드됩니다.
+

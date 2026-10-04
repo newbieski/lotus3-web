@@ -38,3 +38,8 @@ http://localhost:8080/index.html
 - `R`: 인게임 라디오 채널 변경
 - `M`: 사운드 음소거
 - 모바일/태블릿: 화면 하단 터치 가상 패드 & 페달 버튼
+
+## 🌐 GitHub Pages 배포 안내
+본 프로젝트는 **100% 정적 리소스(HTML5 Canvas + Vanilla ES6 Modules)**로 구성되어 있어 빌드 과정(No-Build) 없이 저장소 루트 디렉토리가 그대로 웹 호스팅됩니다:
+- **공개 웹 주소**: `https://newbieski.github.io/lotus3-web/`
+- **배포 설정**: GitHub Repo > `Settings` > `Pages` > Branch: `main` / `/(root)` 선택
