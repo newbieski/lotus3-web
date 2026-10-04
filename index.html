@@ -41,6 +41,7 @@
 
       <!-- Toolbar Buttons -->
       <div class="header-tools">
+        <button id="garageBtn" class="arcade-btn garage-btn">🏎️ GARAGE</button>
         <button id="radioBtn" class="arcade-btn radio-btn">📻 RADIO FM</button>
         <button id="muteBtn" class="arcade-btn">🔊 SOUND</button>
         <button id="scanlineBtn" class="arcade-btn">📺 CRT: ON</button>
@@ -51,6 +52,140 @@
     <div class="screen-container">
       <canvas id="gameCanvas" width="640" height="400"></canvas>
       <div id="crtOverlay" class="crt-scanlines"></div>
+
+      <!-- Garage / Vehicle Selection Modal -->
+      <div id="garageScreen" class="overlay-screen garage-screen" style="display: none;">
+        <div class="garage-card">
+          <div class="garage-header">
+            <h2 class="garage-title">🏎️ LOTUS MOTORSPORT GARAGE 🏎️</h2>
+            <p class="garage-sub">SELECT YOUR OFFICIAL RACING MACHINE</p>
+          </div>
+
+          <div class="garage-cars-grid">
+            <!-- Car 1: Lotus M200 -->
+            <div class="car-card selected" data-car="m200" id="card_m200">
+              <div class="car-badge">HERO CONCEPT</div>
+              <div class="car-preview">
+                <img src="assets/sprites/player_m200_straight.png" alt="Lotus M200" class="garage-sprite">
+              </div>
+              <h3 class="car-name">LOTUS M200 SPEEDSTER</h3>
+              <div class="car-specs">
+                <div class="spec-row">
+                  <span>TOP SPEED:</span>
+                  <div class="meter-bar"><div class="fill" style="width: 88%;"></div></div>
+                  <span class="spec-val">152 MPH</span>
+                </div>
+                <div class="spec-row">
+                  <span>0-60 ACCEL:</span>
+                  <div class="meter-bar"><div class="fill" style="width: 90%;"></div></div>
+                  <span class="spec-val">5.8 SEC</span>
+                </div>
+                <div class="spec-row">
+                  <span>HANDLING:</span>
+                  <div class="meter-bar"><div class="fill" style="width: 92%;"></div></div>
+                  <span class="spec-val">BALANCED</span>
+                </div>
+              </div>
+              <button class="select-car-btn" onclick="window.selectGarageCar('m200')">SELECTED</button>
+            </div>
+
+            <!-- Car 2: Lotus Esprit -->
+            <div class="car-card" data-car="esprit" id="card_esprit">
+              <div class="car-badge red-badge">TURBOCHARGED</div>
+              <div class="car-preview">
+                <img src="assets/sprites/player_esprit_straight.png" alt="Lotus Esprit" class="garage-sprite">
+              </div>
+              <h3 class="car-name">LOTUS ESPRIT TURBO SE</h3>
+              <div class="car-specs">
+                <div class="spec-row">
+                  <span>TOP SPEED:</span>
+                  <div class="meter-bar"><div class="fill red" style="width: 98%;"></div></div>
+                  <span class="spec-val">156 MPH</span>
+                </div>
+                <div class="spec-row">
+                  <span>0-60 ACCEL:</span>
+                  <div class="meter-bar"><div class="fill red" style="width: 96%;"></div></div>
+                  <span class="spec-val">4.9 SEC</span>
+                </div>
+                <div class="spec-row">
+                  <span>HANDLING:</span>
+                  <div class="meter-bar"><div class="fill red" style="width: 76%;"></div></div>
+                  <span class="spec-val">STIFF</span>
+                </div>
+              </div>
+              <button class="select-car-btn" onclick="window.selectGarageCar('esprit')">SELECT</button>
+            </div>
+
+            <!-- Car 3: Lotus Elan -->
+            <div class="car-card" data-car="elan" id="card_elan">
+              <div class="car-badge green-badge">AGILE ROADSTER</div>
+              <div class="car-preview">
+                <img src="assets/sprites/player_elan_straight.png" alt="Lotus Elan" class="garage-sprite">
+              </div>
+              <h3 class="car-name">LOTUS ELAN SE</h3>
+              <div class="car-specs">
+                <div class="spec-row">
+                  <span>TOP SPEED:</span>
+                  <div class="meter-bar"><div class="fill green" style="width: 80%;"></div></div>
+                  <span class="spec-val">142 MPH</span>
+                </div>
+                <div class="spec-row">
+                  <span>0-60 ACCEL:</span>
+                  <div class="meter-bar"><div class="fill green" style="width: 82%;"></div></div>
+                  <span class="spec-val">6.5 SEC</span>
+                </div>
+                <div class="spec-row">
+                  <span>HANDLING:</span>
+                  <div class="meter-bar"><div class="fill green" style="width: 98%;"></div></div>
+                  <span class="spec-val">NIMBLE</span>
+                </div>
+              </div>
+              <button class="select-car-btn" onclick="window.selectGarageCar('elan')">SELECT</button>
+            </div>
+          </div>
+
+          <div class="garage-footer">
+            <button id="closeGarageBtn" class="arcade-start-btn">🏁 CONFIRM & RACE (선택 완료) 🏁</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage Clear Results Modal -->
+      <div id="resultsScreen" class="overlay-screen results-screen" style="display: none;">
+        <div class="results-card">
+          <div class="trophy-header">🏆 STAGE CLEARED! 🏆</div>
+          <h2 id="resultCourseTitle" class="result-title">STAGE: ROADWORKS (공사장)</h2>
+          
+          <div class="result-grid">
+            <div class="result-row">
+              <span class="label">STAGE TIME:</span>
+              <span id="resultTime" class="value yellow">02:18.42</span>
+            </div>
+            <div class="result-row">
+              <span class="label">PERSONAL BEST:</span>
+              <span id="resultBestTime" class="value cyan">--:--.--</span>
+            </div>
+            <div class="result-row">
+              <span class="label">TOP SPEED:</span>
+              <span id="resultTopSpeed" class="value green">246 KM/H</span>
+            </div>
+            <div class="result-row">
+              <span class="label">CHECKPOINTS:</span>
+              <span id="resultCheckpoints" class="value orange">3 / 3 CLEARED (+120s)</span>
+            </div>
+            <div class="result-row">
+              <span class="label">VEHICLE:</span>
+              <span id="resultCarName" class="value white">LOTUS M200 SPEEDSTER</span>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <button id="nextStageBtn" class="arcade-start-btn">▶ NEXT STAGE (다음 코스) ◀</button>
+            <button id="retryStageBtn" class="arcade-btn">🔄 RETRY (다시 도전)</button>
+          </div>
+          <div class="result-hint">PRESS [SPACE] OR [ENTER] TO ADVANCE</div>
+        </div>
+      </div>
 
       <!-- Splash / Click-to-Play Overlay -->
       <div id="splashScreen" class="overlay-screen" onclick="if(window.startGameNow) window.startGameNow();">
@@ -65,6 +200,7 @@
             <span>[⬅ ➡ / A D] 핸들링</span>
             <span>[Shift / X] 기어 변속 (LOW/HIGH)</span>
             <span>[G] 변속 모드 (AUTO/MANUAL)</span>
+            <span>[C] 차고 (GARAGE)</span>
             <span>[R] 라디오 선국</span>
             <span>[M] 사운드 음소거</span>
           </div>

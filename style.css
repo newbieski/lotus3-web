@@ -320,3 +320,259 @@ body {
   background: #0f172a;
   border-top: 1px solid #1e293b;
 }
+
+/* =========================================================================
+   Garage / Vehicle Selection Screen
+   ========================================================================= */
+.garage-screen {
+  z-index: 60;
+  background: rgba(5, 10, 20, 0.94);
+}
+
+.garage-card {
+  width: 94%;
+  max-width: 610px;
+  background: #0b1322;
+  border: 3px solid #ffcc00;
+  box-shadow: 0 0 24px rgba(255, 204, 0, 0.35);
+  border-radius: 6px;
+  padding: 16px 20px;
+  text-align: center;
+}
+
+.garage-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffea00;
+  text-shadow: 2px 2px #000;
+  letter-spacing: 1px;
+}
+
+.garage-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 14px;
+}
+
+.garage-cars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.car-card {
+  background: #111c30;
+  border: 2px solid #233554;
+  border-radius: 6px;
+  padding: 10px 8px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.car-card:hover {
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+}
+
+.car-card.selected {
+  border-color: #00e676;
+  background: #0e2722;
+  box-shadow: 0 0 14px rgba(0, 230, 118, 0.4);
+}
+
+.car-badge {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #eab308;
+  color: #000;
+  font-size: 9px;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.car-badge.red-badge {
+  background: #ef4444;
+  color: #fff;
+}
+
+.car-badge.green-badge {
+  background: #10b981;
+  color: #000;
+}
+
+.car-preview {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0;
+}
+
+.garage-sprite {
+  max-width: 100%;
+  max-height: 58px;
+  image-rendering: pixelated;
+}
+
+.car-name {
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.car-specs {
+  font-size: 9px;
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+.spec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  color: #94a3b8;
+}
+
+.meter-bar {
+  flex: 1;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  margin: 0 6px;
+  overflow: hidden;
+}
+
+.meter-bar .fill {
+  height: 100%;
+  background: #38bdf8;
+}
+
+.meter-bar .fill.red {
+  background: #ef4444;
+}
+
+.meter-bar .fill.green {
+  background: #10b981;
+}
+
+.spec-val {
+  font-weight: bold;
+  color: #f1f5f9;
+  font-size: 8px;
+  width: 44px;
+  text-align: right;
+}
+
+.select-car-btn {
+  width: 100%;
+  padding: 5px 0;
+  font-size: 11px;
+  font-weight: bold;
+  background: #1e293b;
+  color: #fff;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.car-card.selected .select-car-btn {
+  background: #00e676;
+  color: #000;
+  border-color: #00e676;
+}
+
+.garage-footer {
+  margin-top: 6px;
+}
+
+/* =========================================================================
+   Stage Clear Results Screen
+   ========================================================================= */
+.results-screen {
+  z-index: 70;
+  background: rgba(3, 8, 18, 0.95);
+}
+
+.results-card {
+  width: 90%;
+  max-width: 500px;
+  background: #08111f;
+  border: 3px solid #00e676;
+  box-shadow: 0 0 28px rgba(0, 230, 118, 0.45);
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+}
+
+.trophy-header {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffea00;
+  text-shadow: 2px 2px #000, 0 0 12px rgba(255, 234, 0, 0.6);
+  margin-bottom: 6px;
+}
+
+.result-title {
+  font-size: 14px;
+  color: #38bdf8;
+  margin-bottom: 18px;
+  font-weight: bold;
+}
+
+.result-grid {
+  background: #0f1b2d;
+  border: 1px solid #1e3a5f;
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed #1e2d42;
+  font-size: 13px;
+}
+
+.result-row:last-child {
+  border-bottom: none;
+}
+
+.result-row .label {
+  color: #94a3b8;
+  font-weight: bold;
+}
+
+.result-row .value {
+  font-family: monospace;
+  font-weight: 900;
+}
+
+.result-row .value.yellow { color: #facc15; }
+.result-row .value.cyan { color: #38bdf8; }
+.result-row .value.green { color: #4ade80; }
+.result-row .value.orange { color: #fb923c; }
+.result-row .value.white { color: #ffffff; }
+
+.result-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.result-hint {
+  font-size: 10px;
+  color: #64748b;
+  letter-spacing: 1px;
+}

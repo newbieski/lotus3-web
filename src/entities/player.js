@@ -35,6 +35,9 @@ export class Player {
     this.isGameOver = false;
     this.isFinished = false;
     this.currentCheckpointIndex = -1;
+    this.topSpeedReached = 0;
+    this.checkpointsCleared = 0;
+    this.bonusTimeAccumulated = 0;
 
     // Transmission & Gear system (Lotus authentic Low/High)
     this.transmissionMode = 'AUTO'; // 'AUTO' or 'MANUAL'
@@ -167,6 +170,9 @@ export class Player {
 
     // Clamp speed
     this.speed = Math.max(0, Math.min(this.speed, CONFIG.MAX_SPEED * 1.1));
+    if (this.speed > this.topSpeedReached) {
+      this.topSpeedReached = this.speed;
+    }
 
     // Steering
     const speedRatio = this.speed / CONFIG.MAX_SPEED;

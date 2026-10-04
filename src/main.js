@@ -33,6 +33,7 @@ class LotusGame {
 
     this.currentCourseKey = 'roadworks'; // FIRST DEMO STARTS ON ROADWORKS (공사장)!
     this.gameState = 'SPLASH'; // SPLASH, PLAYING, GAMEOVER, FINISHED
+    this.isGarageOpen = false;
     this.loop = new GameLoop(this.update.bind(this), this.render.bind(this));
 
     this.initListeners();
@@ -59,17 +60,69 @@ class LotusGame {
 
   initListeners() {
     window.startGameNow = () => this.startRace();
+    window.selectGarageCar = (carKey) => this.selectGarageCar(carKey);
 
     const splashEl = document.getElementById('splashScreen');
     if (splashEl) {
       splashEl.addEventListener('click', () => this.startRace());
     }
-    this.canvas.addEventListener('click', () => this.startRace());
+    this.canvas.addEventListener('click', () => {
+      if (this.gameState === 'SPLASH') this.startRace();
+    });
+
+    // Garage Screen Header Button & Modal Controls
+    const garageBtn = document.getElementById('garageBtn');
+    if (garageBtn) {
+      garageBtn.addEventListener('click', () => this.toggleGarage());
+    }
+
+    const closeGarageBtn = document.getElementById('closeGarageBtn');
+    if (closeGarageBtn) {
+      closeGarageBtn.addEventListener('click', () => {
+        this.closeGarage();
+        if (this.gameState === 'SPLASH') this.startRace();
+      });
+    }
+
+    // Vehicle Card Selectors in Garage
+    document.querySelectorAll('.car-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        const carKey = card.dataset.car;
+        if (carKey) this.selectGarageCar(carKey);
+      });
+    });
+
+    // Stage Clear Results Screen Action Buttons
+    const nextStageBtn = document.getElementById('nextStageBtn');
+    if (nextStageBtn) {
+      nextStageBtn.addEventListener('click', () => this.nextStage());
+    }
+
+    const retryStageBtn = document.getElementById('retryStageBtn');
+    if (retryStageBtn) {
+      retryStageBtn.addEventListener('click', () => this.retryStage());
+    }
 
     window.addEventListener('keydown', (e) => {
+      if (e.code === 'Escape' && this.isGarageOpen) {
+        e.preventDefault();
+        this.closeGarage();
+        return;
+      }
       if (this.gameState === 'SPLASH' && (e.code === 'Space' || e.key === ' ' || e.code === 'Enter' || e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W')) {
         e.preventDefault();
         this.startRace();
+        return;
+      }
+      if (this.gameState === 'FINISHED' && (e.code === 'Space' || e.key === ' ' || e.code === 'Enter')) {
+        e.preventDefault();
+        this.nextStage();
+        return;
+      }
+      if (this.gameState === 'GAMEOVER' && (e.code === 'Space' || e.key === ' ' || e.code === 'Enter' || e.code === 'ArrowUp')) {
+        e.preventDefault();
+        this.restart();
+        return;
       }
     });
   }
@@ -215,7 +268,157 @@ class LotusGame {
     bindBtn('btnRight', 'right');
   }
 
+  openGarage() {
+    const garageEl = document.getElementById('garageScreen');
+    if (!garageEl) return;
+    this.isGarageOpen = true;
+    this.updateGarageCards();
+    garageEl.style.display = 'flex';
+  }
+
+  closeGarage() {
+    const garageEl = document.getElementById('garageScreen');
+    if (garageEl) garageEl.style.display = 'none';
+    this.isGarageOpen = false;
+  }
+
+  toggleGarage() {
+    if (this.isGarageOpen) {
+      this.closeGarage();
+    } else {
+      this.openGarage();
+    }
+  }
+
+  selectGarageCar(carKey) {
+    if (!this.player.carSpecs[carKey]) return;
+    this.player.setCar(carKey);
+
+    const carSelect = document.getElementById('carSelect');
+    if (carSelect) carSelect.value = carKey;
+
+    this.updateGarageCards();
+    try {
+      this.audio.init();
+      this.audio.resume();
+      this.audio.playGearShift();
+    } catch (e) {}
+
+    const name = this.player.carSpecs[carKey].name;
+    this.renderer.showBanner(`VEHICLE: ${name}`, 2.0, '#ffaa00');
+  }
+
+  updateGarageCards() {
+    const cars = ['m200', 'esprit', 'elan'];
+    for (let car of cars) {
+      const cardEl = document.getElementById(`card_${car}`);
+      if (!cardEl) continue;
+      const isSelected = (car === this.player.selectedCar);
+      if (isSelected) {
+        cardEl.classList.add('selected');
+      } else {
+        cardEl.classList.remove('selected');
+      }
+      const btn = cardEl.querySelector('.select-car-btn');
+      if (btn) {
+        btn.textContent = isSelected ? 'SELECTED' : 'SELECT';
+      }
+    }
+  }
+
+  showResultsScreen() {
+    const resultsEl = document.getElementById('resultsScreen');
+    if (!resultsEl) return;
+
+    const timeSec = this.player.lapTime;
+    const timeFormatted = this.formatTime(timeSec);
+
+    // Personal best storage
+    const bestKey = `lotus3_best_${this.currentCourseKey}`;
+    const storedBest = localStorage.getItem(bestKey);
+    let isNewBest = false;
+    let bestSec = storedBest ? parseFloat(storedBest) : null;
+
+    if (!bestSec || timeSec < bestSec) {
+      bestSec = timeSec;
+      localStorage.setItem(bestKey, timeSec.toString());
+      isNewBest = (storedBest !== null);
+    }
+
+    const titleEl = document.getElementById('resultCourseTitle');
+    if (titleEl) titleEl.textContent = `STAGE: ${this.road.currentCourseName}`;
+
+    const timeEl = document.getElementById('resultTime');
+    if (timeEl) timeEl.textContent = timeFormatted;
+
+    const bestEl = document.getElementById('resultBestTime');
+    if (bestEl) {
+      bestEl.textContent = this.formatTime(bestSec) + (isNewBest ? ' 🏆 NEW RECORD!' : '');
+      bestEl.style.color = isNewBest ? '#ffff00' : '#33ccff';
+    }
+
+    const spec = this.player.carSpecs[this.player.selectedCar] || this.player.carSpecs.m200;
+    const topMph = Math.round(((this.player.topSpeedReached || this.player.speed) / CONFIG.MAX_SPEED) * spec.topSpeedMph);
+    const topKmh = Math.round(topMph * 1.60934);
+
+    const speedEl = document.getElementById('resultTopSpeed');
+    if (speedEl) speedEl.textContent = `${topKmh} KM/H (${topMph} MPH)`;
+
+    const totalCheckpoints = this.road.segments.filter(s => s.isCheckpoint && s.timeBonus > 0).length;
+    const cpEl = document.getElementById('resultCheckpoints');
+    if (cpEl) {
+      cpEl.textContent = `${this.player.checkpointsCleared} / ${totalCheckpoints} CLEARED (+${this.player.bonusTimeAccumulated}s)`;
+    }
+
+    const carEl = document.getElementById('resultCarName');
+    if (carEl) carEl.textContent = spec.name;
+
+    resultsEl.style.display = 'flex';
+    try {
+      this.audio.playVictoryFanfare();
+    } catch (e) {}
+  }
+
+  hideResultsScreen() {
+    const resultsEl = document.getElementById('resultsScreen');
+    if (resultsEl) resultsEl.style.display = 'none';
+  }
+
+  formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return '00:00.00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 100);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+  }
+
+  nextStage() {
+    const COURSE_KEYS = ['roadworks', 'forest', 'snow', 'desert', 'night', 'storm'];
+    const currentIndex = COURSE_KEYS.indexOf(this.currentCourseKey);
+    const nextIndex = (currentIndex + 1) % COURSE_KEYS.length;
+    const nextCourse = COURSE_KEYS[nextIndex];
+
+    this.hideResultsScreen();
+    this.loadTrack(nextCourse);
+
+    const courseSelect = document.getElementById('courseSelect');
+    if (courseSelect) courseSelect.value = nextCourse;
+
+    this.gameState = 'PLAYING';
+    if (nextIndex === 0) {
+      this.renderer.showBanner('🏆 CHAMPIONSHIP COMPLETED! STARTING NEW LOOP! 🏆', 3.5, '#ffff00');
+    } else {
+      this.renderer.showBanner(`NEXT STAGE: ${this.road.currentCourseName} - GO!`, 2.5, '#00ff66');
+    }
+  }
+
+  retryStage() {
+    this.hideResultsScreen();
+    this.restart();
+  }
+
   restart() {
+    this.hideResultsScreen();
     this.player.reset();
     this.loadTrack(this.currentCourseKey);
     this.gameState = 'PLAYING';
@@ -238,15 +441,20 @@ class LotusGame {
       this.renderer.showBanner(`TRANSMISSION: ${mode}`, 1.2, '#33ccff');
     }
 
+    // Garage toggle on key 'C'
+    if (this.input.keys.garage) {
+      this.input.keys.garage = false;
+      this.toggleGarage();
+    }
+
+    if (this.isGarageOpen) return;
+
     if (this.gameState === 'FINISHED') {
       // Smoothly coast vehicle down to a stop after finish line
       this.player.speed = Math.max(0, this.player.speed - 3200 * dt);
       this.player.z += this.player.speed * dt;
       this.player.x *= 0.98;
       this.rivals.update(dt, this.road, this.player);
-      if (this.input.keys.brake || this.input.keys.up) {
-        this.restart();
-      }
       return;
     }
 
@@ -270,6 +478,15 @@ class LotusGame {
     // Update Player physics
     this.player.update(dt, this.input, currentSegment);
 
+    // Real-time asphalt tire skid marks (Hard braking or oil spinouts)
+    if ((this.player.isBraking && this.player.speed > 3000) || this.player.isSpinning) {
+      this.road.addSkidMark(currentSegment.index, this.player.x - 0.22);
+      this.road.addSkidMark(currentSegment.index, this.player.x + 0.22);
+      if (this.player.speed > 3500) {
+        this.renderer.spawnDust(this.canvas.width / 2 + (this.player.steer * 35), this.canvas.height - 20);
+      }
+    }
+
     // Update Rivals
     this.rivals.update(dt, this.road, this.player);
 
@@ -278,6 +495,8 @@ class LotusGame {
       this.player.currentCheckpointIndex = currentSegment.index;
 
       if (currentSegment.timeBonus > 0) {
+        this.player.checkpointsCleared++;
+        this.player.bonusTimeAccumulated += currentSegment.timeBonus;
         this.player.timeRemaining += currentSegment.timeBonus;
         this.audio.playCheckpointChime();
         this.renderer.showBanner(`CHECKPOINT! +${currentSegment.timeBonus} SECONDS`, 2.5, '#ffff00');
@@ -285,6 +504,7 @@ class LotusGame {
         this.player.isFinished = true;
         this.gameState = 'FINISHED';
         this.renderer.showBanner('STAGE CLEARED!', 4.0, '#00ff66');
+        this.showResultsScreen();
       }
     }
 
@@ -334,7 +554,7 @@ class LotusGame {
 
     // Audio Engine Update
     const speedRatio = this.player.speed / CONFIG.MAX_SPEED;
-    const isScreeching = (Math.abs(this.player.steer) > 1.2 && speedRatio > 0.45);
+    const isScreeching = (Math.abs(this.player.steer) > 1.2 && speedRatio > 0.45) || (this.player.isBraking && speedRatio > 0.35) || this.player.isSpinning;
     this.audio.updateEngine(speedRatio, this.input.keys.up, this.player.isBraking, isScreeching);
   }
 

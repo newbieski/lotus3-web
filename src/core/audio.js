@@ -271,6 +271,29 @@ export class AudioManager {
     osc.stop(now + 0.12);
   }
 
+  playVictoryFanfare() {
+    if (!this.ctx) return;
+    const notes = [
+      { f: 523.25, d: 0.15, t: 0 },    // C5
+      { f: 659.25, d: 0.15, t: 0.16 }, // E5
+      { f: 783.99, d: 0.15, t: 0.32 }, // G5
+      { f: 1046.50, d: 0.65, t: 0.48 } // High C6 triumphant finish chord
+    ];
+    const now = this.ctx.currentTime;
+    for (let n of notes) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(n.f, now + n.t);
+      gain.gain.setValueAtTime(0.28, now + n.t);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + n.t + n.d);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + n.t);
+      osc.stop(now + n.t + n.d);
+    }
+  }
+
   playBGM(trackName = 'lotus3_radio_mix') {
     if (this.currentTrack === trackName && this.bgm && !this.bgm.paused) return;
 

@@ -62,6 +62,9 @@ export class InputManager {
       case 'KeyR':
         this.keys.radio = true;
         break;
+      case 'KeyC':
+        this.keys.garage = true;
+        break;
     }
   }
 

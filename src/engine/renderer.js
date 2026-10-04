@@ -356,6 +356,23 @@ export class Renderer {
         segment.color.lane
       );
     }
+
+    // Real-Time Tire Skid Marks on Asphalt (Hard braking & 360 oil spinouts)
+    if (segment.skidMarks && segment.skidMarks.length > 0) {
+      for (let skid of segment.skidMarks) {
+        const sw1 = p1.w * (skid.width || 0.08);
+        const sw2 = p2.w * (skid.width || 0.08);
+        const sx1 = p1.x + (skid.offset * p1.w);
+        const sx2 = p2.x + (skid.offset * p2.w);
+        this.drawPolygon(ctx,
+          sx1 - sw1, p1.y,
+          sx1 + sw1, p1.y,
+          sx2 + sw2, p2.y,
+          sx2 - sw2, p2.y,
+          'rgba(18, 18, 20, 0.70)'
+        );
+      }
+    }
   }
 
   drawPolygon(ctx, x1, y1, x2, y2, x3, y3, x4, y4, color) {

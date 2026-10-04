@@ -115,6 +115,18 @@ export class RoadManager {
     }
   }
 
+  addSkidMark(segmentIndex, offset, width = 0.08) {
+    if (this.segments[segmentIndex]) {
+      if (!this.segments[segmentIndex].skidMarks) {
+        this.segments[segmentIndex].skidMarks = [];
+      }
+      this.segments[segmentIndex].skidMarks.push({ offset, width });
+      if (this.segments[segmentIndex].skidMarks.length > 4) {
+        this.segments[segmentIndex].skidMarks.shift();
+      }
+    }
+  }
+
   addCheckpoint(n, timeBonus = 45) {
     if (this.segments[n]) {
       this.segments[n].isCheckpoint = true;
